@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from base.models import User, Dokter, Pasien, Apoteker, Resepsionis
+from .models import User, Dokter, Pasien, Apoteker, Resepsionis
 
 admin.site.register(User)
 admin.site.register(Dokter)

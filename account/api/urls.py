@@ -15,7 +15,6 @@ router.register('dokter', views.DokterModelViewset, basename='dokter')
 router.register('pasien', views.PasienModelViewset, basename='pasien')
 router.register('apoteker', views.ApotekerModelViewset, basename='apoteker')
 
-
 urlpatterns = [
     path('', include(router.urls)),
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
