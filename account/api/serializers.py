@@ -1,9 +1,8 @@
 from rest_framework import serializers
 
-from base.models import Dokter, User, Pasien, Apoteker
+from base.models import Dokter, User, Pasien, Apoteker, Resepsionis
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -34,7 +33,7 @@ class UserModelSerializer(serializers.ModelSerializer):
 class PasienModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pasien
-        exclude = ['id', 'user']
+        fields = '__all__'
 
 
 class DokterModelSerializer(serializers.ModelSerializer):
@@ -46,4 +45,10 @@ class DokterModelSerializer(serializers.ModelSerializer):
 class ApotekerModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Apoteker
+        fields = '__all__'
+
+
+class ResepsionisModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Resepsionis
         fields = '__all__'

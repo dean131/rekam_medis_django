@@ -42,6 +42,7 @@ class User(AbstractBaseUser):
         ("pasien", "Pasien"),
         ("dokter", "Dokter"),
         ("apoteker", "Apoteker"),
+        ("resepsionis", "Resepsionis"),
         ("admin", "Admin"),
     )
 
@@ -52,7 +53,7 @@ class User(AbstractBaseUser):
     )
     nama_lengkap = models.CharField(max_length=255)
 
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=15, choices=ROLE_CHOICES)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -104,6 +105,13 @@ class Dokter(models.Model):
 
 
 class Apoteker(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.user.nama_lengkap
+    
+
+class Resepsionis(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
     def __str__(self):
