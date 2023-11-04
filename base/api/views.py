@@ -46,7 +46,15 @@ class PendaftaranModelViewset(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            {
+                'code': '201',
+                'status': 'success',
+                'message': 'Pendaftaran berhasil dilakukan.',
+            }, 
+            status=status.HTTP_201_CREATED, 
+            headers=headers
+        )
 
 
 class JadwalDokterModelViewset(ModelViewSet):
