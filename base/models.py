@@ -56,4 +56,4 @@ class Pemeriksaan(models.Model):
     alergi = models.TextField()
     riwayat_penyakit = models.TextField()
     resep = models.TextField()
-    otp = models.CharField(max_length=6)
+    token = models.CharField(max_length=64, blank=True, null=True)

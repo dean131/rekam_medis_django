@@ -1,4 +1,6 @@
 import datetime
+import string
+import random
 
 from django.db.models import Q
 
@@ -51,6 +53,62 @@ class PendaftaranModelViewset(ModelViewSet):
                 'code': '201',
                 'status': 'success',
                 'message': 'Pendaftaran berhasil dilakukan.',
+            }, 
+            status=status.HTTP_201_CREATED, 
+            headers=headers
+        )
+    
+
+class PemeriksaanModelViewset(ModelViewSet):
+    queryset = Pemeriksaan.objects.all()
+    serializer_class = PemeriksaanModelSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request):
+        pendaftaran = Pendaftaran.objects.filter(
+            pasien=request.user.pasien.id,
+        ).first()
+
+        if not pendaftaran:
+            return Response(
+                {
+                    'code': '400',
+                    'status': 'failed',
+                    'message': 'Pasien belum mendaftar.',
+                }, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if pendaftaran.status == 'belum_bayar':
+            return Response(
+                {
+                    'code': '400',
+                    'status': 'failed',
+                    'message': 'Pasien belum membayar.',
+                }, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=64))
+        request.data.update(
+            {
+                'pendaftaran': pendaftaran.id,
+                'token': token,
+            }
+        )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(request.data)
+
+        pendaftaran.status = 'selesai'
+        pendaftaran.save()
+        return Response(
+            {
+                'code': '201',
+                'status': 'success',
+                'message': 'Pemeriksaan berhasil dilakukan.',
             }, 
             status=status.HTTP_201_CREATED, 
             headers=headers
