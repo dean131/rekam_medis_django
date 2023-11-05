@@ -58,6 +58,8 @@ class PendaftaranModelViewset(ModelViewSet):
             headers=headers
         )
     
+    
+    
 
 class PemeriksaanModelViewset(ModelViewSet):
     queryset = Pemeriksaan.objects.all()

@@ -2,9 +2,9 @@ import datetime
 
 from rest_framework import serializers
 
-from account.models import Dokter, User, Pasien, Apoteker, Resepsionis
-
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from account.models import Dokter, User, Pasien, Apoteker, Resepsionis
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -29,10 +29,11 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        exclude = ['password', 'is_active', 'last_login']
 
 
 class PasienModelSerializer(serializers.ModelSerializer):
+    user = UserModelSerializer()
     umur = serializers.SerializerMethodField()
 
     class Meta:
@@ -46,18 +47,24 @@ class PasienModelSerializer(serializers.ModelSerializer):
 
 
 class DokterModelSerializer(serializers.ModelSerializer):
+    user = UserModelSerializer()
+    
     class Meta:
         model = Dokter
         fields = '__all__'
 
 
 class ApotekerModelSerializer(serializers.ModelSerializer):
+    user = UserModelSerializer()
+    
     class Meta:
         model = Apoteker
         fields = '__all__'
 
 
 class ResepsionisModelSerializer(serializers.ModelSerializer):
+    user = UserModelSerializer()
+
     class Meta:
         model = Resepsionis
         fields = '__all__'

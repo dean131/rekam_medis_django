@@ -17,22 +17,301 @@ from .serializers import (
 )
 
 
-class PasienModelViewset(ModelViewSet):
-    queryset = Pasien.objects.filter()
-    serializer_class = PasienModelSerializer
+class PasienModelViewset(ViewSet):
     permission_classes = [IsAuthenticated]
 
+    def list(self, request):
+        queryset = Pasien.objects.all()
+        serializer = PasienModelSerializer(queryset, many=True)
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'data': serializer.data
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    def retrieve(self, request, pk=None):
+        pasien = Pasien.objects.filter(pk=pk).first()
+        serializer = PasienModelSerializer(pasien)
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'data': serializer.data
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    def update(self, request, pk=None):
+        pasien = Pasien.objects.filter(pk=pk).first()
+        pasien.nik = request.data['nik']
+        pasien.tanggal_lahir = request.data['tanggal_lahir']
+        pasien.jenis_kelamin = request.data['jenis_kelamin']
+        pasien.alamat = request.data['alamat']
+        pasien.no_telp = request.data['no_telp']
+        pasien.pekerjaan = request.data['pekerjaan']
+        pasien.save()
 
-class DokterModelViewset(ModelViewSet):
-    queryset = Dokter.objects.all()
-    serializer_class = DokterModelSerializer
+        user = User.objects.get(pk=pasien.user.pk)
+        user.nama_lengkap = request.data['nama_lengkap']
+
+        email = request.data['email']
+        if email != user.email:
+            if User.objects.filter(email=email).exists():
+                return Response(
+                    {
+                        'code': '400',
+                        'status': 'failed',
+                        'message': 'Email sudah terdaftar.',
+                    }, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user.email = email
+        user.save()
+
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Update Berhasil.'
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    def destroy(self, request, pk=None):
+        pasien = Pasien.objects.get(pk=pk)
+        user = User.objects.get(pk=pasien.user.pk)
+        pasien.delete()
+        user.delete()
+
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Delete Berhasil.'
+            }, 
+            status=status.HTTP_200_OK
+        )
+
+
+class DokterModelViewset(ViewSet):
     permission_classes = [IsAuthenticated]
 
+    def list(self, request):
+        dokter = Dokter.objects.all()
+        serializer = DokterModelSerializer(dokter, many=True)
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'data': serializer.data
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    def retrieve(self, request, pk=None):
+        dokter = Dokter.objects.get(pk=pk)
+        serializer = DokterModelSerializer(dokter)
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'data': serializer.data
+            }, 
+            status=status.HTTP_200_OK
+        )
 
-class ApotekerModelViewset(ModelViewSet):
-    queryset = Apoteker.objects.filter()
-    serializer_class = ApotekerModelSerializer
+    def update(self, request, pk=None):
+        dokter = Dokter.objects.get(pk=pk)
+        dokter.poli = request.data['poli']
+        dokter.save()
+
+        user = User.objects.get(pk=dokter.user.pk)
+        user.nama_lengkap = request.data['nama_lengkap']
+
+        email = request.data['email']
+        if email != user.email:
+            if User.objects.filter(email=email).exists():
+                return Response(
+                    {
+                        'code': '400',
+                        'status': 'failed',
+                        'message': 'Email sudah terdaftar.',
+                    }, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user.email = email
+        user.save()
+
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Update Berhasil.'
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    def destroy(self, request, pk=None):
+        dokter = Dokter.objects.get(pk=pk)
+        user = User.objects.get(pk=dokter.user.pk)
+        dokter.delete()
+        user.delete()
+
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Delete Berhasil.'
+            }, 
+            status=status.HTTP_200_OK
+        )
+
+
+class ApotekerModelViewset(ViewSet):
     permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        apoteker = Apoteker.objects.all()
+        serializer = ApotekerModelSerializer(apoteker, many=True)
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'data': serializer.data
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    def retrieve(self, request, pk=None):
+        apoteker = Apoteker.objects.get(pk=pk)
+        serializer = ApotekerModelSerializer(apoteker)
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'data': serializer.data
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    def update(self, request, pk=None):
+        apoteker = Apoteker.objects.get(pk=pk)
+
+        user = User.objects.get(pk=apoteker.user.pk)
+        user.nama_lengkap = request.data['nama_lengkap']
+
+        email = request.data['email']
+        if email != user.email:
+            if User.objects.filter(email=email).exists():
+                return Response(
+                    {
+                        'code': '400',
+                        'status': 'failed',
+                        'message': 'Email sudah terdaftar.',
+                    }, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user.email = email
+        user.save()
+
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Update Berhasil.'
+            }, 
+            status=status.HTTP_200_OK
+        )
+
+    def destroy(self, request, pk=None):
+        apoteker = Apoteker.objects.get(pk=pk)
+        user = User.objects.get(pk=apoteker.user.pk)
+        apoteker.delete()
+        user.delete()
+
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Delete Berhasil.'
+            }, 
+            status=status.HTTP_200_OK
+        )
+
+
+class ResepsionisModelViewset(ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        resepsionis = Resepsionis.objects.all()
+        serializer = ResepsionisModelSerializer(resepsionis, many=True)
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'data': serializer.data
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    def retrieve(self, request, pk=None):
+        resepsionis = Resepsionis.objects.get(pk=pk)
+        serializer = ResepsionisModelSerializer(resepsionis)
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'data': serializer.data
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    def update(self, request, pk=None):
+        resepsionis = Resepsionis.objects.get(pk=pk)
+
+        user = User.objects.get(pk=resepsionis.user.pk)
+        user.nama_lengkap = request.data['nama_lengkap']
+
+        email = request.data['email']
+        if email != user.email:
+            if User.objects.filter(email=email).exists():
+                return Response(
+                    {
+                        'code': '400',
+                        'status': 'failed',
+                        'message': 'Email sudah terdaftar.',
+                    }, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user.email = email
+        user.save()
+
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Update Berhasil.'
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    def destroy(self, request, pk=None):
+        resepsionis = Resepsionis.objects.get(pk=pk)
+        user = User.objects.get(pk=resepsionis.user.pk)
+        resepsionis.delete()
+        user.delete()
+
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Delete Berhasil.'
+            }, 
+            status=status.HTTP_200_OK
+        )
 
 
 class RegisterViewset(ViewSet):
@@ -62,15 +341,23 @@ class RegisterViewset(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        request.data.update({'role': 'pasien'})
-        user_serializer = UserModelSerializer(data=request.data)
-        user_serializer.is_valid(raise_exception=True)
-        user = User.objects.create_user(**user_serializer.validated_data)
 
-        request.data.update({'user': user.id})
-        pasien_serialzer = PasienModelSerializer(data=request.data)
-        pasien_serialzer.is_valid(raise_exception=True)
-        Pasien.objects.create(**pasien_serialzer.validated_data)
+        user = User.objects.create_user(
+            email=request.data['email'], 
+            password=request.data['password'],
+            nama_lengkap=request.data['nama_lengkap'],
+            role='pasien',
+        )
+
+        Pasien.objects.create(
+            user=user,
+            nik=request.data['nik'],
+            tanggal_lahir=request.data['tanggal_lahir'],
+            jenis_kelamin=request.data['jenis_kelamin'],
+            alamat=request.data['alamat'],
+            no_telp=request.data['no_telp'],
+            pekerjaan=request.data['pekerjaan'],
+        )
 
         return Response(
             {
@@ -95,15 +382,17 @@ class RegisterViewset(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        request.data.update({'role': 'dokter'})
-        user_serializer = UserModelSerializer(data=request.data)
-        user_serializer.is_valid(raise_exception=True)
-        user = User.objects.create_user(**user_serializer.validated_data)
+        user = User.objects.create_user(
+            email=request.data['email'], 
+            password=request.data['password'],
+            nama_lengkap=request.data['nama_lengkap'],
+            role='dokter',
+        )
 
-        request.data.update({'user': user.id})
-        dokter_serialzer = DokterModelSerializer(data=request.data)
-        dokter_serialzer.is_valid(raise_exception=True)
-        Dokter.objects.create(**dokter_serialzer.validated_data)
+        Dokter.objects.create(
+            user=user,
+            poli=request.data['poli'],
+        )
 
         return Response(
             {
@@ -128,15 +417,16 @@ class RegisterViewset(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        request.data.update({'role': 'apoteker'})
-        user_serializer = UserModelSerializer(data=request.data)
-        user_serializer.is_valid(raise_exception=True)
-        user = User.objects.create_user(**user_serializer.validated_data)
+        user = User.objects.create_user(
+            email=request.data['email'], 
+            password=request.data['password'],
+            nama_lengkap=request.data['nama_lengkap'],
+            role='apoteker',
+        )
 
-        request.data.update({'user': user.id})
-        apoteker_serialzer = ApotekerModelSerializer(data=request.data)
-        apoteker_serialzer.is_valid(raise_exception=True)
-        Apoteker.objects.create(**apoteker_serialzer.validated_data)
+        Apoteker.objects.create(
+            user=user,
+        )
 
         return Response(
             {
@@ -161,15 +451,16 @@ class RegisterViewset(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        request.data.update({'role': 'resepsionis'})
-        user_serializer = UserModelSerializer(data=request.data)
-        user_serializer.is_valid(raise_exception=True)
-        user = User.objects.create_user(**user_serializer.validated_data)
+        user = User.objects.create_user(
+            email=request.data['email'], 
+            password=request.data['password'],
+            nama_lengkap=request.data['nama_lengkap'],
+            role='resepsionis',
+        )
 
-        request.data.update({'user': user.id})
-        resepsionis_serialzer = ResepsionisModelSerializer(data=request.data)
-        resepsionis_serialzer.is_valid(raise_exception=True)
-        Resepsionis.objects.create(**resepsionis_serialzer.validated_data)
+        Resepsionis.objects.create(
+            user=user,
+        )
 
         return Response(
             {
