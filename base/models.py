@@ -1,6 +1,6 @@
 from django.db import models
 
-from account.models import User, Dokter, Pasien, Apoteker, Resepsionis
+from account.models import Dokter, Pasien
 
 
 class JadwalDokter(models.Model):
@@ -54,16 +54,3 @@ class Pemeriksaan(models.Model):
         return self.pendaftaran.pasien.user.nama_lengkap
 
 
-
-
-# keluhan = models.TextField()
-# suhu_tubuh = models.DecimalField(max_digits=5, decimal_places=2)
-# tensi_darah = models.CharField(max_length=10)
-# berat_badan = models.DecimalField(max_digits=5, decimal_places=2)
-# tinggi_badan = models.DecimalField(max_digits=5, decimal_places=2)
-# nadi_per_menit = models.CharField(max_length=10)
-# diagnosis = models.TextField()
-# intruksi = models.TextField()
-# alergi = models.TextField()
-# riwayat_penyakit = models.TextField()
-# resep = models.TextField()

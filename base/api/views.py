@@ -1,6 +1,5 @@
 import datetime
 import os
-import base64
 from io import BytesIO
 
 from xhtml2pdf import pisa
@@ -25,8 +24,23 @@ from .serializers import (
     PemeriksaanModelSerializer
 )
 
-from rekam_medis.aes_256 import generate_key, encrypt_file, decrypt_file
+from cryptography.fernet import Fernet
 
+
+def encrypt_file(filename, output_file, key):
+    fernet = Fernet(key)
+    with open(filename, 'rb') as f:
+        file_data = f.read()
+    encrypted_data = fernet.encrypt(file_data)
+    with open(output_file, 'wb') as f:
+        f.write(encrypted_data)
+
+
+def decrypt_file(filename, key):
+    fernet = Fernet(key)
+    with open(filename, 'rb') as f:
+        encrypted_data = f.read()
+    return fernet.decrypt(encrypted_data)
 
 
 def render_to_pdf(context_dict):
@@ -243,7 +257,7 @@ class PemeriksaanModelViewset(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        token = str(generate_key(), 'UTF-8')
+        token = str(Fernet.generate_key(), 'UTF-8')
 
         pdf = render_to_pdf({
             'pasien': request.user.pasien,
