@@ -27,3 +27,36 @@ class AESCipher(object):
     @staticmethod
     def _unpad(s):
         return s[:-ord(s[len(s)-1:])]
+    
+
+
+from cryptography.fernet import Fernet
+
+# Generate a random key
+def generate_key():
+    key = Fernet.generate_key()
+    # with open('secret.key', 'wb') as key_file:
+    #     key_file.write(key)
+    return key
+
+# Load the key from a file
+def load_key():
+    return open('secret.key', 'rb').read()
+
+# Encrypt a file
+def encrypt_file(filename, output_file, key):
+    fernet = Fernet(key)
+    with open(filename, 'rb') as file:
+        file_data = file.read()
+    encrypted_data = fernet.encrypt(file_data)
+    with open(output_file, 'wb') as file:
+        file.write(encrypted_data)
+
+# Decrypt a file
+def decrypt_file(filename, output_file, key):
+    fernet = Fernet(key)
+    with open(filename, 'rb') as file:
+        encrypted_data = file.read()
+    decrypted_data = fernet.decrypt(encrypted_data)
+    with open(output_file, 'wb') as file:
+        file.write(decrypted_data)

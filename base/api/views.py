@@ -244,7 +244,9 @@ class PemeriksaanModelViewset(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        token = ''.join(random.choices(string.ascii_letters, k=32))
+        from rekam_medis.aes_256 import generate_key, encrypt_file, decrypt_file
+
+        token = generate_key()
 
         pdf = render_to_pdf({
             'pasien': request.user.pasien,
@@ -265,16 +267,11 @@ class PemeriksaanModelViewset(ViewSet):
         with open(settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf', 'wb') as f:
             f.write(pdf.content)
 
-        with open(settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf', 'rb') as f:
-            data = f.read()
-
-        encoded = base64.b64encode(data)
-
-        aes = AESCipher(token)
-        encrypted = aes.encrypt(str(encoded, 'UTF-8'))
-
-        with open(settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf.enc', 'wb') as f:
-            f.write(encrypted)
+        encrypt_file(
+            settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf', 
+            settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf.enc', 
+            token
+        )
         
         os.remove(settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf')
 
