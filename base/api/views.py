@@ -1,5 +1,9 @@
 import datetime
 import os
+import string
+import random
+import base64
+from rekam_medis.aes_256 import AESCipher
 
 from django.db.models import Q
 from django.conf import settings
@@ -35,24 +39,6 @@ def render_to_pdf(context_dict):
         return HttpResponse(result.getvalue(), content_type='application/pdf')
     
     return None
-
-# Encrypt a file
-def encrypt_file(filename, output_file, key):
-    fernet = Fernet(key)
-    with open(filename, 'rb') as file:
-        file_data = file.read()
-    encrypted_data = fernet.encrypt(file_data)
-    with open(output_file, 'wb') as file:
-        file.write(encrypted_data)
-
-# Decrypt a file
-def decrypt_file(filename, key):
-    fernet = Fernet(key)
-    with open(filename, 'rb') as file:
-        encrypted_data = file.read()
-    decrypted_data = fernet.decrypt(encrypted_data)
-    with open(filename, 'wb') as file:
-        file.write(decrypted_data)
 
 
 class PendaftaranModelViewset(ViewSet):
@@ -258,40 +244,52 @@ class PemeriksaanModelViewset(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        token = Fernet.generate_key()
+        token = ''.join(random.choices(string.ascii_letters, k=32))
 
         pdf = render_to_pdf({
             'pasien': request.user.pasien,
-
-            # 'keluhan': request.data['keluhan'],
-            # 'suhu_tubuh': request.data['suhu_tubuh'],
-            # 'tensi_darah': request.data['tensi_darah'],
-            # 'berat_badan': request.data['berat_badan'],
-            # 'tinggi_badan': request.data['tinggi_badan'],
-            # 'nadi_per_menit': request.data['nadi_per_menit'],
-            # 'intruksi': request.data['intruksi'],
-            # 'alergi': request.data['alergi'],
-            # 'riwayat_penyakit': request.data['riwayat_penyakit'],
-            # 'diagnosis': request.data['diagnosis'],
-            # 'resep': request.data['resep'],
+            'keluhan': request.data['keluhan'],
+            'suhu_tubuh': request.data['suhu_tubuh'],
+            'tensi_darah': request.data['tensi_darah'],
+            'berat_badan': request.data['berat_badan'],
+            'tinggi_badan': request.data['tinggi_badan'],
+            'nadi_per_menit': request.data['nadi_per_menit'],
+            'intruksi': request.data['intruksi'],
+            'alergi': request.data['alergi'],
+            'riwayat_penyakit': request.data['riwayat_penyakit'],
+            'diagnosis': request.data['diagnosis'],
+            'resep': request.data['resep'],
         })
 
-        with open(settings.MEDIA_ROOT / f'generated_pdf/{pendaftaran.id}.pdf', 'wb') as f:
+
+        with open(settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf', 'wb') as f:
             f.write(pdf.content)
 
-        encrypt_file(
-            settings.MEDIA_ROOT / f'generated_pdf/{pendaftaran.id}.pdf', 
-            settings.MEDIA_ROOT / f'encrypted_pdf/{pendaftaran.id}.pdf.enc', 
-            token
-        )
-        
-        os.remove(settings.MEDIA_ROOT / f'generated_pdf/{pendaftaran.id}.pdf')
+        with open(settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf', 'rb') as f:
+            data = f.read()
 
-        Pemeriksaan.objects.update_or_create(
-            pendaftaran=pendaftaran,
-            path_pdf=f'encrypted_pdf/{pendaftaran.id}.pdf.enc',
+        encoded = base64.b64encode(data)
+
+        aes = AESCipher(token)
+        encrypted = aes.encrypt(str(encoded, 'UTF-8'))
+
+        with open(settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf.enc', 'wb') as f:
+            f.write(encrypted)
+        
+        os.remove(settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf')
+
+        pemeriksaan = Pemeriksaan.objects.filter(pendaftaran=pendaftaran)
+        if not pemeriksaan:
+            Pemeriksaan.objects.create(
+                pendaftaran=pendaftaran,
+                path_pdf=f'{pendaftaran.id}.pdf.enc',
+                token=token
+            )
+
+        pemeriksaan.update(
+            path_pdf=f'{pendaftaran.id}.pdf.enc',
             token=token
-        )
+        )   
 
         pendaftaran.status = 'selesai'
         pendaftaran.save()
@@ -307,13 +305,11 @@ class PemeriksaanModelViewset(ViewSet):
     def retrieve(self, request, pk=None):
         pemeriksaan = Pemeriksaan.objects.get(id=pk)
 
-        print(pemeriksaan.token)
-        print(type(pemeriksaan.token))
-
-        fernet = Fernet(pemeriksaan.token)
-        with open(settings.MEDIA_ROOT / pemeriksaan.path_pdf, 'rb') as file:
-            encrypted_data = file.read()
-        decrypted_data = fernet.decrypt(encrypted_data)
+        aes = AESCipher(pemeriksaan.token)
+        with open(settings.MEDIA_ROOT / pemeriksaan.path_pdf, 'rb') as f:
+            encrypted_data = f.read()
+        decrypted_data = aes.decrypt(encrypted_data)
+        decrypted_data = base64.b64decode(bytes(decrypted_data, 'UTF-8'))
 
         return HttpResponse(decrypted_data, content_type='application/pdf')
 

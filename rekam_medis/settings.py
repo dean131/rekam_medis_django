@@ -176,13 +176,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_URL = 'media/'
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'static/media' #development
+# MEDIA_ROOT = BASE_DIR / 'static/media' #development
+
+STATIC_ROOT = '/home/faiz7297/public_html/rekammedis.faiznazhir.com/static' #production
+MEDIA_ROOT = '/home/faiz7297/public_html/rekammedis.faiznazhir.com/static/media' #production
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
