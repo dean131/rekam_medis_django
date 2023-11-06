@@ -243,7 +243,7 @@ class PemeriksaanModelViewset(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        token = generate_key()
+        token = str(generate_key(), 'UTF-8')
 
         pdf = render_to_pdf({
             'pasien': request.user.pasien,
@@ -299,7 +299,7 @@ class PemeriksaanModelViewset(ViewSet):
     def retrieve(self, request, pk=None):
         pemeriksaan = Pemeriksaan.objects.get(id=pk)
 
-        key = pemeriksaan.token
+        key = bytes(pemeriksaan.token, 'UTF-8')
         decrypted_data = decrypt_file(settings.MEDIA_ROOT / pemeriksaan.path_pdf, key)
         return HttpResponse(decrypted_data, content_type='application/pdf')
 
