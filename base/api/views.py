@@ -1,10 +1,11 @@
 import datetime
 import os
-import string
-import random
 import base64
-from rekam_medis.aes_256 import AESCipher
+from io import BytesIO
 
+from xhtml2pdf import pisa
+
+from django.template.loader import get_template
 from django.db.models import Q
 from django.conf import settings
 from django.http import HttpResponse
@@ -24,10 +25,8 @@ from .serializers import (
     PemeriksaanModelSerializer
 )
 
-from cryptography.fernet import Fernet
-from io import BytesIO
-from django.template.loader import get_template
-from xhtml2pdf import pisa
+from rekam_medis.aes_256 import generate_key, encrypt_file, decrypt_file
+
 
 
 def render_to_pdf(context_dict):
@@ -244,8 +243,6 @@ class PemeriksaanModelViewset(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        from rekam_medis.aes_256 import generate_key, encrypt_file, decrypt_file
-
         token = generate_key()
 
         pdf = render_to_pdf({
@@ -302,12 +299,8 @@ class PemeriksaanModelViewset(ViewSet):
     def retrieve(self, request, pk=None):
         pemeriksaan = Pemeriksaan.objects.get(id=pk)
 
-        aes = AESCipher(pemeriksaan.token)
-        with open(settings.MEDIA_ROOT / pemeriksaan.path_pdf, 'rb') as f:
-            encrypted_data = f.read()
-        decrypted_data = aes.decrypt(encrypted_data)
-        decrypted_data = base64.b64decode(bytes(decrypted_data, 'UTF-8'))
-
+        key = pemeriksaan.token
+        decrypted_data = decrypt_file(settings.MEDIA_ROOT / pemeriksaan.path_pdf, key)
         return HttpResponse(decrypted_data, content_type='application/pdf')
 
 

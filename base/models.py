@@ -49,7 +49,7 @@ class Pendaftaran(models.Model):
 class Pemeriksaan(models.Model):
     pendaftaran = models.OneToOneField(Pendaftaran, on_delete=models.CASCADE)
     path_pdf = models.CharField(max_length=255, blank=True, null=True)
-    token = models.TextField(blank=True, null=True)
+    token = models.BinaryField(blank=True, null=True)
     def __str__(self):
         return self.pendaftaran.pasien.user.nama_lengkap
 
