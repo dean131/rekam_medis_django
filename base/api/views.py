@@ -275,16 +275,16 @@ class PemeriksaanModelViewset(ViewSet):
         })
 
 
-        with open(settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf', 'wb') as f:
+        with open(f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf', 'wb') as f:
             f.write(pdf.content)
 
         encrypt_file(
-            settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf', 
-            settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf.enc', 
+            f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf', 
+            f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf.enc', 
             token
         )
         
-        os.remove(settings.MEDIA_ROOT / f'{pendaftaran.id}.pdf')
+        os.remove(f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf')
 
         pemeriksaan = Pemeriksaan.objects.filter(pendaftaran=pendaftaran)
         if not pemeriksaan:
@@ -314,7 +314,7 @@ class PemeriksaanModelViewset(ViewSet):
         pemeriksaan = Pemeriksaan.objects.get(id=pk)
 
         key = bytes(pemeriksaan.token, 'UTF-8')
-        decrypted_data = decrypt_file(settings.MEDIA_ROOT / pemeriksaan.path_pdf, key)
+        decrypted_data = decrypt_file(f'{settings.MEDIA_ROOT}/{pemeriksaan.path_pdf}', key)
         return HttpResponse(decrypted_data, content_type='application/pdf')
 
 
