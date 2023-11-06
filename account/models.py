@@ -54,6 +54,7 @@ class User(AbstractBaseUser):
     nama_lengkap = models.CharField(max_length=255)
 
     role = models.CharField(max_length=15, choices=ROLE_CHOICES)
+    foto = models.ImageField(upload_to="foto/", null=True, blank=True)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -101,13 +102,6 @@ class Dokter(models.Model):
     poli = models.CharField(max_length=50)
     max_pasien = models.IntegerField(default=15)
 
-    def __str__(self):
-        return self.user.nama_lengkap
-
-
-class Apoteker(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    
     def __str__(self):
         return self.user.nama_lengkap
     

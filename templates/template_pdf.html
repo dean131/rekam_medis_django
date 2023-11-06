@@ -1,17 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekam Medis</title>
+    <title>Laporan Rekam Medis</title>
+    <style>
+        /* Styles for the body and page layout */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        h2 {
+            background-color: #f2f2f2;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* Styles for the patient information section */
+        h2:first-of-type {
+            margin-top: 0;
+        }
+
+        /* Styles for the table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Styles for the footer */
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-style: italic;
+            color: #888;
+        }
+
+    </style>
 </head>
 <body>
-    <h1>Rekam Medis</h1>
-    <table border="1">
+    <h1>Laporan Rekam Medis</h1>
+
+    <h2>Informasi Pasien</h2>
+    <p><strong>Nama:</strong>{{pasien.user.nama_lengkap}}</p>
+    <p><strong>Tanggal Lahir:</strong>{{pasien.tanggal_lahir}}</p>
+    <p><strong>Jenis Kelamin:</strong>{{pasien.jenis_kelamin}}</p>
+    <p><strong>Pekerjaan:</strong>{{pasien.pekerjaan}}</p>
+    <p><strong>Alamat:</strong>{{pasien.alamat}}</p>
+
+    <h2>Riwayat Kesehatan</h2>
+    <p><strong>Diagnosis:</strong> Diabetes Tipe 2</p>
+    <p><strong>Tanggal Diagnosis:</strong> 10 Juli 2010</p>
+    <p><strong>Rekomendasi Perawatan:</strong> Diet rendah gula, olahraga rutin, obat-obatan</p>
+
+    {% if riwayat %}
+    <h2>Riwayat Pengobatan</h2>
+    <table>
         <tr>
-            <td>Nama</td>
-            <td>{{pasien.user.nama_lengkap}}</td>
+            <th>Tanggal</th>
+            <th>Nama Obat</th>
+            <th>Dosis</th>
         </tr>
-    </table>    
+        <tr>
+            <td>1 Januari 2021</td>
+            <td>Metformin</td>
+            <td>500 mg</td>
+        </tr>
+        <tr>
+            <td>1 Februari 2021</td>
+            <td>Glibenclamide</td>
+            <td>2.5 mg</td>
+        </tr>
+    </table>
+    {% endif %}
+
+    <h2>Hasil Pemeriksaan Terakhir</h2>
+    <p><strong>Tekanan Darah:</strong> 120/80 mmHg</p>
+    <p><strong>Gula Darah:</strong> 110 mg/dL</p>
+    <p><strong>HbA1c:</strong> 6.5%</p>
+
+    <h2>Catatan Tambahan</h2>
+    <p>{{ catatan }}</p>
+
+    <footer>
+        <p>Laporan dibuat pada tanggal: {{ tanggal_pembuatan }}</p>
+    </footer>
 </body>
 </html>

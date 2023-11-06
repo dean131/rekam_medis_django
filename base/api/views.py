@@ -20,8 +20,7 @@ from account.models import Pasien, Dokter
 
 from .serializers import (
     PendaftaranModelSerializer, 
-    JadwalDokterModelSerializer, 
-    PemeriksaanModelSerializer
+    JadwalDokterModelSerializer,
 )
 
 from cryptography.fernet import Fernet
@@ -272,6 +271,8 @@ class PemeriksaanModelViewset(ViewSet):
             'riwayat_penyakit': request.data['riwayat_penyakit'],
             'diagnosis': request.data['diagnosis'],
             'resep': request.data['resep'],
+            'tanggal_pembuatan': datetime.date.today(),
+            # 'catatan': request.data['catatan'],
         })
 
 
@@ -313,7 +314,8 @@ class PemeriksaanModelViewset(ViewSet):
     def retrieve(self, request, pk=None):
         pemeriksaan = Pemeriksaan.objects.get(id=pk)
 
-        key = bytes(pemeriksaan.token, 'UTF-8')
+        user_key = request.data['key']
+        key = bytes(user_key, 'UTF-8')
         decrypted_data = decrypt_file(f'{settings.MEDIA_ROOT}/{pemeriksaan.path_pdf}', key)
         return HttpResponse(decrypted_data, content_type='application/pdf')
 
@@ -358,3 +360,7 @@ class JadwalDokterModelViewset(ViewSet):
             }, 
             status=status.HTTP_200_OK
         )
+    
+
+
+    

@@ -2,8 +2,6 @@ from rest_framework import serializers
 
 from base.models import Pendaftaran, Pemeriksaan, JadwalDokter
 
-from account.api.serializers import DokterModelSerializer
-
 
 class PendaftaranModelSerializer(serializers.ModelSerializer):
     class Meta:

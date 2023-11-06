@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from account.models import Dokter, User, Pasien, Apoteker, Resepsionis
+from account.models import Dokter, User, Pasien, Resepsionis
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -51,14 +51,6 @@ class DokterModelSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Dokter
-        fields = '__all__'
-
-
-class ApotekerModelSerializer(serializers.ModelSerializer):
-    user = UserModelSerializer()
-    
-    class Meta:
-        model = Apoteker
         fields = '__all__'
 
 

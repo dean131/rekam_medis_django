@@ -1,18 +1,16 @@
 from django.db import transaction
 
-from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
 
-from account.models import Dokter, Apoteker, Pasien, User, Resepsionis
+from account.models import Dokter, Pasien, User, Resepsionis
 
 from .serializers import (
     PasienModelSerializer, 
     DokterModelSerializer, 
-    ApotekerModelSerializer, 
-    UserModelSerializer,
     ResepsionisModelSerializer,
 )
 
@@ -22,7 +20,7 @@ class PasienModelViewset(ViewSet):
 
     def list(self, request):
         queryset = Pasien.objects.all()
-        serializer = PasienModelSerializer(queryset, many=True)
+        serializer = PasienModelSerializer(queryset, many=True, context={'request': request})
         return Response(
             {
                 'code': '200',
@@ -34,7 +32,7 @@ class PasienModelViewset(ViewSet):
     
     def retrieve(self, request, pk=None):
         pasien = Pasien.objects.filter(pk=pk).first()
-        serializer = PasienModelSerializer(pasien)
+        serializer = PasienModelSerializer(pasien, context={'request': request})
         return Response(
             {
                 'code': '200',
@@ -56,6 +54,7 @@ class PasienModelViewset(ViewSet):
 
         user = User.objects.get(pk=pasien.user.pk)
         user.nama_lengkap = request.data['nama_lengkap']
+        user.foto = request.data['foto']
 
         email = request.data['email']
         if email != user.email:
@@ -101,7 +100,7 @@ class DokterModelViewset(ViewSet):
 
     def list(self, request):
         dokter = Dokter.objects.all()
-        serializer = DokterModelSerializer(dokter, many=True)
+        serializer = DokterModelSerializer(dokter, many=True, context={'request': request})
         return Response(
             {
                 'code': '200',
@@ -113,7 +112,7 @@ class DokterModelViewset(ViewSet):
     
     def retrieve(self, request, pk=None):
         dokter = Dokter.objects.get(pk=pk)
-        serializer = DokterModelSerializer(dokter)
+        serializer = DokterModelSerializer(dokter, context={'request': request})
         return Response(
             {
                 'code': '200',
@@ -131,6 +130,7 @@ class DokterModelViewset(ViewSet):
 
         user = User.objects.get(pk=dokter.user.pk)
         user.nama_lengkap = request.data['nama_lengkap']
+        user.foto = request.data['foto']
 
         email = request.data['email']
         if email != user.email:
@@ -171,84 +171,12 @@ class DokterModelViewset(ViewSet):
         )
 
 
-class ApotekerModelViewset(ViewSet):
-    permission_classes = [IsAuthenticated]
-
-    def list(self, request):
-        apoteker = Apoteker.objects.all()
-        serializer = ApotekerModelSerializer(apoteker, many=True)
-        return Response(
-            {
-                'code': '200',
-                'status': 'success',
-                'data': serializer.data
-            }, 
-            status=status.HTTP_200_OK
-        )
-    
-    def retrieve(self, request, pk=None):
-        apoteker = Apoteker.objects.get(pk=pk)
-        serializer = ApotekerModelSerializer(apoteker)
-        return Response(
-            {
-                'code': '200',
-                'status': 'success',
-                'data': serializer.data
-            }, 
-            status=status.HTTP_200_OK
-        )
-    
-    def update(self, request, pk=None):
-        apoteker = Apoteker.objects.get(pk=pk)
-
-        user = User.objects.get(pk=apoteker.user.pk)
-        user.nama_lengkap = request.data['nama_lengkap']
-
-        email = request.data['email']
-        if email != user.email:
-            if User.objects.filter(email=email).exists():
-                return Response(
-                    {
-                        'code': '400',
-                        'status': 'failed',
-                        'message': 'Email sudah terdaftar.',
-                    }, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            user.email = email
-        user.save()
-
-        return Response(
-            {
-                'code': '200',
-                'status': 'success',
-                'message': 'Update Berhasil.'
-            }, 
-            status=status.HTTP_200_OK
-        )
-
-    def destroy(self, request, pk=None):
-        apoteker = Apoteker.objects.get(pk=pk)
-        user = User.objects.get(pk=apoteker.user.pk)
-        apoteker.delete()
-        user.delete()
-
-        return Response(
-            {
-                'code': '200',
-                'status': 'success',
-                'message': 'Delete Berhasil.'
-            }, 
-            status=status.HTTP_200_OK
-        )
-
-
 class ResepsionisModelViewset(ViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
         resepsionis = Resepsionis.objects.all()
-        serializer = ResepsionisModelSerializer(resepsionis, many=True)
+        serializer = ResepsionisModelSerializer(resepsionis, many=True, context={'request': request})
         return Response(
             {
                 'code': '200',
@@ -260,7 +188,7 @@ class ResepsionisModelViewset(ViewSet):
     
     def retrieve(self, request, pk=None):
         resepsionis = Resepsionis.objects.get(pk=pk)
-        serializer = ResepsionisModelSerializer(resepsionis)
+        serializer = ResepsionisModelSerializer(resepsionis, context={'request': request})
         return Response(
             {
                 'code': '200',
@@ -275,6 +203,7 @@ class ResepsionisModelViewset(ViewSet):
 
         user = User.objects.get(pk=resepsionis.user.pk)
         user.nama_lengkap = request.data['nama_lengkap']
+        user.foto = request.data['foto']
 
         email = request.data['email']
         if email != user.email:
@@ -348,6 +277,7 @@ class RegisterViewset(ViewSet):
             password=request.data['password'],
             nama_lengkap=request.data['nama_lengkap'],
             role='pasien',
+            foto=request.FILES.get('foto', None),
         )
 
         Pasien.objects.create(
@@ -394,40 +324,6 @@ class RegisterViewset(ViewSet):
             user=user,
             poli=request.data['poli'],
             max_pasien=request.data['max_pasien'],
-        )
-
-        return Response(
-            {
-                'code': '201',
-                'status': 'success',
-                'message': 'Registrasi Berhasil.'
-            }, 
-            status=status.HTTP_201_CREATED
-        )
-    
-    @transaction.atomic
-    @action(detail=False, methods=['post'])
-    def apoteker(self, request):
-        # CEK EMAIL SUDA TERDAFTAR ATAU BELUM
-        if User.objects.filter(email=request.data['email']).exists():
-            return Response(
-                {
-                    'code': '400',
-                    'status': 'failed',
-                    'message': 'Email sudah terdaftar.',
-                }, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        user = User.objects.create_user(
-            email=request.data['email'], 
-            password=request.data['password'],
-            nama_lengkap=request.data['nama_lengkap'],
-            role='apoteker',
-        )
-
-        Apoteker.objects.create(
-            user=user,
         )
 
         return Response(

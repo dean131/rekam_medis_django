@@ -14,7 +14,6 @@ router = routers.DefaultRouter()
 router.register('register', views.RegisterViewset, basename='register')
 router.register('dokter', views.DokterModelViewset, basename='dokter')
 router.register('pasien', views.PasienModelViewset, basename='pasien')
-router.register('apoteker', views.ApotekerModelViewset, basename='apoteker')
 router.register('resepsionis', views.ResepsionisModelViewset, basename='resepsionis')
 
 
