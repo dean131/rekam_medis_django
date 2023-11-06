@@ -99,6 +99,7 @@ class Pasien(models.Model):
 class Dokter(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     poli = models.CharField(max_length=50)
+    max_pasien = models.IntegerField(default=15)
 
     def __str__(self):
         return self.user.nama_lengkap

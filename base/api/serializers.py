@@ -22,7 +22,7 @@ class JadwalDokterModelSerializer(serializers.ModelSerializer):
     nama_dokter = serializers.SerializerMethodField('get_nama_dokter')
     class Meta:
         model = JadwalDokter
-        fields = ['id', 'dokter_id', 'nama_dokter', 'hari', 'waktu',]
+        fields = ['id', 'dokter_id', 'nama_dokter', 'hari', 'jam_mulai', 'jam_selesai']
 
     def get_dokter_id(self, obj):
         return obj.dokter.id

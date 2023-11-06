@@ -126,6 +126,7 @@ class DokterModelViewset(ViewSet):
     def update(self, request, pk=None):
         dokter = Dokter.objects.get(pk=pk)
         dokter.poli = request.data['poli']
+        dokter.max_pasien = request.data['max_pasien']
         dokter.save()
 
         user = User.objects.get(pk=dokter.user.pk)
@@ -392,6 +393,7 @@ class RegisterViewset(ViewSet):
         Dokter.objects.create(
             user=user,
             poli=request.data['poli'],
+            max_pasien=request.data['max_pasien'],
         )
 
         return Response(

@@ -2,8 +2,21 @@ from django.contrib import admin
 
 from .models import Pemeriksaan, Pendaftaran, JadwalDokter
 
-admin.site.register(Pemeriksaan)
-admin.site.register(Pendaftaran)
+
+class PemeriksaanAdmin(admin.ModelAdmin):
+    list_display = ('id', 'pendaftaran', 'path_pdf', 'token')
+    search_fields = ('pendaftaran__pasien__user__nama_lengkap', 'pendaftaran__dokter__user__nama_lengkap')
+
+admin.site.register(Pemeriksaan, PemeriksaanAdmin)
+
+
+class PendafaranAdmin(admin.ModelAdmin):
+    list_display = ('id', 'pasien', 'dokter', 'poli', 'asuransi', 'status', 'tanggal', 'no_antrean', 'is_full')
+    list_filter = ('status', 'tanggal', 'is_full')
+    search_fields = ('pasien__user__nama_lengkap', 'dokter__user__nama_lengkap', 'poli')
+
+admin.site.register(Pendaftaran, PendafaranAdmin)
+
 admin.site.register(JadwalDokter)
 
 admin.site.site_header = 'Rekam Medis'

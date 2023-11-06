@@ -16,7 +16,8 @@ class JadwalDokter(models.Model):
 
     dokter = models.ForeignKey(Dokter, on_delete=models.CASCADE)
     hari = models.CharField(max_length=10, choices=HARI_CHOICES)
-    waktu = models.CharField(max_length=15)
+    jam_mulai = models.TimeField()
+    jam_selesai = models.TimeField()
 
 
 class Pendaftaran(models.Model):
@@ -37,23 +38,32 @@ class Pendaftaran(models.Model):
 
     pasien = models.ForeignKey(Pasien, on_delete=models.CASCADE)
     dokter = models.ForeignKey(Dokter, on_delete=models.CASCADE)
-    tanggal = models.DateField()
     poli = models.CharField(max_length=50, choices=POLI_CHOICES)
     asuransi = models.BooleanField(default=False)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="belum_bayar")
+    tanggal = models.DateField()
+    no_antrean = models.IntegerField(default=None, blank=True, null=True)
+    is_full = models.BooleanField(default=False)
 
 
 class Pemeriksaan(models.Model):
-    pendaftaran = models.ForeignKey(Pendaftaran, on_delete=models.CASCADE)
-    keluhan = models.TextField()
-    suhu_tubuh = models.DecimalField(max_digits=5, decimal_places=2)
-    tensi_darah = models.CharField(max_length=10)
-    berat_badan = models.DecimalField(max_digits=5, decimal_places=2)
-    tinggi_badan = models.DecimalField(max_digits=5, decimal_places=2)
-    nadi_per_menit = models.CharField(max_length=10)
-    diagnosis = models.TextField()
-    intruksi = models.TextField()
-    alergi = models.TextField()
-    riwayat_penyakit = models.TextField()
-    resep = models.TextField()
-    token = models.CharField(max_length=64, blank=True, null=True)
+    pendaftaran = models.OneToOneField(Pendaftaran, on_delete=models.CASCADE)
+    path_pdf = models.CharField(max_length=255, blank=True, null=True)
+    token = models.BinaryField(blank=True, null=True)
+    def __str__(self):
+        return self.pendaftaran.pasien.user.nama_lengkap
+
+
+
+
+# keluhan = models.TextField()
+# suhu_tubuh = models.DecimalField(max_digits=5, decimal_places=2)
+# tensi_darah = models.CharField(max_length=10)
+# berat_badan = models.DecimalField(max_digits=5, decimal_places=2)
+# tinggi_badan = models.DecimalField(max_digits=5, decimal_places=2)
+# nadi_per_menit = models.CharField(max_length=10)
+# diagnosis = models.TextField()
+# intruksi = models.TextField()
+# alergi = models.TextField()
+# riwayat_penyakit = models.TextField()
+# resep = models.TextField()
