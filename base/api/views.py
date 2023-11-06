@@ -74,9 +74,9 @@ class PendaftaranModelViewset(ViewSet):
             )
         
         dokter = Dokter.objects.filter(id=request.data['dokter']).first()
-        pendaftaran = Pendaftaran.objects.filter(tanggal=request.data['tanggal'])
+        count = Pendaftaran.objects.filter(tanggal=request.data['tanggal']).count()
 
-        if len(pendaftaran) >= dokter.max_pasien:
+        if count >= dokter.max_pasien:
             return Response(
                 {
                     'code': '400',
@@ -121,6 +121,20 @@ class PendaftaranModelViewset(ViewSet):
     def retrieve(self, request, pk=None):
         pendaftaran = Pendaftaran.objects.filter(id=pk).first()
         serializer = PendaftaranModelSerializer(pendaftaran)
+
+        if pendaftaran.status == 'antre':
+            count = Pendaftaran.objects.filter(tanggal=pendaftaran.tanggal, status='selesai').count()
+            antrean_saat_ini = (pendaftaran.no_antrean - count) - 1
+            return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Data Pendaftaran berhasil diambil.',
+                'antrean_saat_ini': antrean_saat_ini,
+                'data': serializer.data
+            }, 
+            status=status.HTTP_200_OK
+        )
         return Response(
             {
                 'code': '200',

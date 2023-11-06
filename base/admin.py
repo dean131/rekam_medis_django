@@ -11,8 +11,8 @@ admin.site.register(Pemeriksaan, PemeriksaanAdmin)
 
 
 class PendafaranAdmin(admin.ModelAdmin):
-    list_display = ('id', 'pasien', 'dokter', 'poli', 'asuransi', 'status', 'tanggal', 'no_antrean', 'is_full')
-    list_filter = ('status', 'tanggal', 'is_full')
+    list_display = ('id', 'pasien', 'dokter', 'poli', 'asuransi', 'status', 'tanggal', 'no_antrean')
+    list_filter = ('status', 'tanggal')
     search_fields = ('pasien__user__nama_lengkap', 'dokter__user__nama_lengkap', 'poli')
 
 admin.site.register(Pendaftaran, PendafaranAdmin)

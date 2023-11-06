@@ -43,13 +43,13 @@ class Pendaftaran(models.Model):
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="belum_bayar")
     tanggal = models.DateField()
     no_antrean = models.IntegerField(default=None, blank=True, null=True)
-    is_full = models.BooleanField(default=False)
 
 
 class Pemeriksaan(models.Model):
     pendaftaran = models.OneToOneField(Pendaftaran, on_delete=models.CASCADE)
     path_pdf = models.CharField(max_length=255, blank=True, null=True)
     token = models.TextField(blank=True, null=True)
+    
     def __str__(self):
         return self.pendaftaran.pasien.user.nama_lengkap
 
