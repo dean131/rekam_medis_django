@@ -41,6 +41,7 @@ class JadwalDokterModelSerializer(serializers.ModelSerializer):
         return None
     
     def get_is_full(self, obj):
-        if self.context['count'] >= obj.dokter.max_pasien:
+        count = Pendaftaran.objects.filter(tanggal=self.context['request'].query_params.get('tanggal'), dokter=obj.dokter).count()
+        if count >= obj.dokter.max_pasien:
             return True
         return False

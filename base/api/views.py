@@ -381,10 +381,8 @@ class JadwalDokterModelViewset(ViewSet):
         int_hari = datetime.date(int(tanggal[0]), int(tanggal[1]), int(tanggal[2])).weekday()
         hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu']
 
-        count = Pendaftaran.objects.filter(tanggal=request.query_params.get('tanggal')).count()
-
         jadwal_dokter = JadwalDokter.objects.filter(hari=hari[int_hari], dokter__poli=poli)
-        serializer = JadwalDokterModelSerializer(jadwal_dokter, many=True, context={'requset': request, 'count': count})
+        serializer = JadwalDokterModelSerializer(jadwal_dokter, many=True, context={'request': request})
         return Response(
             {
                 'code': '200',
