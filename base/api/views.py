@@ -1,5 +1,7 @@
 import datetime
 import os
+import httpx
+import asyncio
 from io import BytesIO
 
 from xhtml2pdf import pisa
@@ -24,22 +26,6 @@ from .serializers import (
 )
 
 from cryptography.fernet import Fernet
-
-
-def encrypt_file(filename, output_file, key):
-    fernet = Fernet(key)
-    with open(filename, 'rb') as f:
-        file_data = f.read()
-    encrypted_data = fernet.encrypt(file_data)
-    with open(output_file, 'wb') as f:
-        f.write(encrypted_data)
-
-
-def decrypt_file(filename, key):
-    fernet = Fernet(key)
-    with open(filename, 'rb') as f:
-        encrypted_data = f.read()
-    return fernet.decrypt(encrypted_data)
 
 
 def render_to_pdf(context_dict):
@@ -209,9 +195,9 @@ class PendaftaranModelViewset(ViewSet):
             status=status.HTTP_200_OK
         )
 
-    @action(detail=True, methods=['get'])
-    def riwayat(self, request, pk=None):
-        pasien = Pasien.objects.filter(id=pk).first()
+    @action(detail=False, methods=['get'])
+    def riwayat(self, request):
+        pasien = Pasien.objects.filter(id=request.query_params.get('pasien_id')).first()
 
         status_param = request.query_params.get('status')
         pendaftaran = Pendaftaran.objects.filter(pasien=pasien, status=status_param)
@@ -231,17 +217,29 @@ class PendaftaranModelViewset(ViewSet):
 class PemeriksaanModelViewset(ViewSet):
     permission_classes = [IsAuthenticated]
 
+    async def send_wa_msg(self, number, message):
+        async with httpx.AsyncClient() as client:
+            res = await client.post(
+                url='https://api.fonnte.com/send', 
+                headers={'Authorization': 'D2Rgt2EnoYQ7G5K-wrFg'},
+                json={
+                    'target': number, 
+                    'message': message
+                }
+            )
+            return res
+
     def create(self, request):
-        pendaftaran = Pendaftaran.objects.filter(
-            pasien=request.user.pasien.id,
-        ).first()
+        pasien = Pasien.objects.filter(id=request.data.get('pasien')).first()
+        dokter = Dokter.objects.filter(id=request.data.get('dokter')).first()
+        pendaftaran = Pendaftaran.objects.filter(pasien=pasien, dokter=dokter).first()
 
         if not pendaftaran:
             return Response(
                 {
                     'code': '400',
                     'status': 'failed',
-                    'message': 'Pasien belum mendaftar.',
+                    'message': 'Pasien belum mendaftar pada dokter ini.',
                 }, 
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -257,6 +255,22 @@ class PemeriksaanModelViewset(ViewSet):
             )
 
         token = str(Fernet.generate_key(), 'UTF-8')
+
+        if Pemeriksaan.objects.filter(pendaftaran=pendaftaran).exists():
+            return Response(
+                {
+                    'code': '400',
+                    'status': 'failed',
+                    'message': 'Pasien sudah diperiksa.',
+                }, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        Pemeriksaan.objects.create(
+            pendaftaran=pendaftaran,
+            path_pdf=f'{pendaftaran.id}.pdf.enc',
+            token=token
+        )
 
         pdf = render_to_pdf({
             'pasien': request.user.pasien,
@@ -275,30 +289,13 @@ class PemeriksaanModelViewset(ViewSet):
             # 'catatan': request.data['catatan'],
         })
 
+        fernet = Fernet(token)
+        encrypted_data = fernet.encrypt(pdf.content)
+        with open(f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf.enc', 'wb') as f:
+            f.write(encrypted_data)
 
-        with open(f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf', 'wb') as f:
-            f.write(pdf.content)
-
-        encrypt_file(
-            f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf', 
-            f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf.enc', 
-            token
-        )
-        
-        os.remove(f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf')
-
-        pemeriksaan = Pemeriksaan.objects.filter(pendaftaran=pendaftaran)
-        if not pemeriksaan:
-            Pemeriksaan.objects.create(
-                pendaftaran=pendaftaran,
-                path_pdf=f'{pendaftaran.id}.pdf.enc',
-                token=token
-            )
-
-        pemeriksaan.update(
-            path_pdf=f'{pendaftaran.id}.pdf.enc',
-            token=token
-        )   
+        # message = 'Token anda adalah:\n\n' + token + '\n\nSilahkan masukkan token tersebut pada aplikasi untuk melihat hasil pemeriksaan.'
+        # asyncio.run(self.send_wa_msg(pasien.no_telp, message))
 
         pendaftaran.status = 'selesai'
         pendaftaran.save()
@@ -311,12 +308,17 @@ class PemeriksaanModelViewset(ViewSet):
             status=status.HTTP_201_CREATED, 
         )
     
-    def retrieve(self, request, pk=None):
-        pemeriksaan = Pemeriksaan.objects.get(id=pk)
+    @action(detail=False, methods=['post'])
+    def get_pdf(self, request):
+        pendaftaran = Pendaftaran.objects.filter(id=request.data.get('pendaftaran_id')).first()
+        pemeriksaan = Pemeriksaan.objects.filter(pendaftaran=pendaftaran).first()
+        key = bytes(request.data.get('key'), 'UTF-8')
 
-        user_key = request.data['key']
-        key = bytes(user_key, 'UTF-8')
-        decrypted_data = decrypt_file(f'{settings.MEDIA_ROOT}/{pemeriksaan.path_pdf}', key)
+        with open(f'{settings.MEDIA_ROOT}/{pemeriksaan.path_pdf}', 'rb') as f:
+            encrypted_data = f.read()
+
+        fernet = Fernet(key)
+        decrypted_data = fernet.decrypt(encrypted_data)
         return HttpResponse(decrypted_data, content_type='application/pdf')
 
 
