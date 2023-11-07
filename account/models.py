@@ -98,8 +98,17 @@ class Pasien(models.Model):
 
 
 class Dokter(models.Model):
+    POLI_CHOICES = (
+        ("umum", "Umum"),
+        ("mulut/gigi", "Mulut/Gigi"),
+        ("lansia", "Lansia"),
+        ("pkpr", "PKPR"),
+        ("kia/kb", "KIA/KB"),
+        ("mtbm/mtbs", "MTBM/MTBS"),
+    )
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    poli = models.CharField(max_length=50)
+    poli = models.CharField(max_length=50, choices=POLI_CHOICES)
     max_pasien = models.IntegerField(default=15)
 
     def __str__(self):

@@ -44,6 +44,29 @@ class PasienModelViewset(ViewSet):
     
     def update(self, request, pk=None):
         pasien = Pasien.objects.filter(pk=pk).first()
+        
+        if pasien.user.email != request.data.get('email'):
+            if User.objects.filter(email=request.data.get('email')).exists():
+                return Response(
+                    {
+                        'code': '400',
+                        'status': 'failed',
+                        'message': 'Email sudah terdaftar.',
+                    }, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        if pasien.nik != request.data.get('nik'):
+            if Pasien.objects.filter(nik=request.data.get('nik')).exists():
+                return Response(
+                    {
+                        'code': '400',
+                        'status': 'failed',
+                        'message': 'NIK sudah terdaftar.',
+                    }, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
         pasien.nik = request.data.get('nik')
         pasien.tanggal_lahir = request.data.get('tanggal_lahir')
         pasien.jenis_kelamin = request.data.get('jenis_kelamin')
@@ -250,7 +273,6 @@ class RegisterViewset(ViewSet):
     @transaction.atomic
     @action(detail=False, methods=['post'])
     def pasien(self, request):
-        # CEK EMAIL SUDA TERDAFTAR ATAU BELUM
         if User.objects.filter(email=request.data.get('email')).exists():
             return Response(
                 {
@@ -260,7 +282,7 @@ class RegisterViewset(ViewSet):
                 }, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-        # CEK NIK SUDA TERDAFTAR ATAU BELUM
+        
         if Pasien.objects.filter(nik=request.data.get('nik')).exists():
             return Response(
                 {
@@ -302,7 +324,6 @@ class RegisterViewset(ViewSet):
     @transaction.atomic
     @action(detail=False, methods=['post'])
     def dokter(self, request):
-        # CEK EMAIL SUDA TERDAFTAR ATAU BELUM
         if User.objects.filter(email=request.data.get('email')).exists():
             return Response(
                 {
@@ -319,7 +340,7 @@ class RegisterViewset(ViewSet):
             nama_lengkap=request.data.get('nama_lengkap'),
             role='dokter',
             foto=request.data.get('foto', None),
-        ),
+        )
 
         Dokter.objects.create(
             user=user,
@@ -339,7 +360,6 @@ class RegisterViewset(ViewSet):
     @transaction.atomic
     @action(detail=False, methods=['post'])
     def resepsionis(self, request):
-        # CEK EMAIL SUDA TERDAFTAR ATAU BELUM
         if User.objects.filter(email=request.data.get('email')).exists():
             return Response(
                 {

@@ -4,9 +4,13 @@ from base.models import Pendaftaran, Pemeriksaan, JadwalDokter
 
 
 class PendaftaranModelSerializer(serializers.ModelSerializer):
+    poli = serializers.SerializerMethodField('get_poli')
     class Meta:
         model = Pendaftaran
         fields = '__all__'
+
+    def get_poli(self, obj):
+        return obj.dokter.poli
 
 
 class PemeriksaanModelSerializer(serializers.ModelSerializer):

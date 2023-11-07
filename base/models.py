@@ -27,18 +27,8 @@ class Pendaftaran(models.Model):
         ("selesai", "Selesai"),
     )
 
-    POLI_CHOICES = (
-        ("umum", "Umum"),
-        ("mulut/gigi", "Mulut/Gigi"),
-        ("lansia", "Lansia"),
-        ("pkpr", "PKPR"),
-        ("kia/kb", "KIA/KB"),
-        ("mtbm/mtbs", "MTBM/MTBS"),
-    )
-
     pasien = models.ForeignKey(Pasien, on_delete=models.CASCADE)
     dokter = models.ForeignKey(Dokter, on_delete=models.CASCADE)
-    poli = models.CharField(max_length=50, choices=POLI_CHOICES)
     asuransi = models.BooleanField(default=False)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="belum_bayar")
     tanggal = models.DateField()

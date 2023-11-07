@@ -61,6 +61,7 @@ class PendaftaranModelViewset(ViewSet):
             Q(Q(status='belum_bayar') | Q(status='antre')),
             pasien=request.user.pasien.id, 
             dokter=request.data['dokter'],
+            tanggal=request.data['tanggal'],
         ).exists()
 
         if exists:
@@ -68,7 +69,7 @@ class PendaftaranModelViewset(ViewSet):
                 {
                     'code': '400',
                     'status': 'failed',
-                    'message': 'Anda sudah mendaftar pada dokter ini. Silahkan selesaikan dulu.',
+                    'message': 'Anda sudah mendaftar pada dokter dan tanggal tersebut. Silahkan cek riwayat pendaftaran.',
                 }, 
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -90,7 +91,6 @@ class PendaftaranModelViewset(ViewSet):
             pasien=request.user.pasien,
             dokter=dokter,
             tanggal=request.data['tanggal'],
-            poli=request.data['poli'],
             asuransi=request.data['asuransi'],
             status='belum_bayar',
             no_antrean=None
@@ -135,6 +135,7 @@ class PendaftaranModelViewset(ViewSet):
             }, 
             status=status.HTTP_200_OK
         )
+
         return Response(
             {
                 'code': '200',
@@ -147,12 +148,24 @@ class PendaftaranModelViewset(ViewSet):
     
     def update(self, request, pk=None):
         pendaftaran = Pendaftaran.objects.filter(id=pk).first()
-        pendaftaran.pasien = request.data['pasien']
-        pendaftaran.dokter = request.data['dokter']
-        pendaftaran.tanggal = request.data['tanggal']
-        pendaftaran.poli = request.data['poli']
+        dokter = Dokter.objects.filter(id=request.data['dokter']).first()
+
+        if request.data['tanggal'] != pendaftaran.tanggal:
+            count = Pendaftaran.objects.filter(tanggal=request.data['tanggal']).count()
+            if count >= dokter.max_pasien:
+                return Response(
+                    {
+                        'code': '400',
+                        'status': 'failed',
+                        'message': 'Antrean Penuh, coba pilih lain waktu.',
+                    }, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            pendaftaran.tanggal = request.data['tanggal']
+
+        pendaftaran.dokter = dokter
+        pendaftaran.poli = dokter.poli
         pendaftaran.asuransi = request.data['asuransi']
-        pendaftaran.status = request.data['status']
         pendaftaran.save()
 
         return Response(
@@ -181,7 +194,7 @@ class PendaftaranModelViewset(ViewSet):
     def bayar(self, request, pk=None):
         pendaftaran = Pendaftaran.objects.get(id=pk)
 
-        jml_pendaftaran = len(Pendaftaran.objects.filter(tanggal=pendaftaran.tanggal, no_antrean__isnull=False))
+        jml_pendaftaran = Pendaftaran.objects.filter(tanggal=pendaftaran.tanggal, no_antrean__isnull=False).count()
 
         pendaftaran.status = 'antre'
         pendaftaran.no_antrean = jml_pendaftaran + 1
@@ -197,39 +210,12 @@ class PendaftaranModelViewset(ViewSet):
         )
 
     @action(detail=True, methods=['get'])
-    def belum_bayar(self, request, pk=None):
+    def riwayat(self, request, pk=None):
         pasien = Pasien.objects.filter(id=pk).first()
-        pendaftaran = Pendaftaran.objects.filter(pasien=pasien, status='belum_bayar')
-        serializer = PendaftaranModelSerializer(pendaftaran, many=True)
-        return Response(
-            {
-                'code': '200',
-                'status': 'success',
-                'message': 'Data Pendaftaran berhasil diambil.',
-                'data': serializer.data
-            }, 
-            status=status.HTTP_200_OK
-        )
-    
-    @action(detail=True, methods=['get'])
-    def antre(self, request, pk=None):
-        pasien = Pasien.objects.filter(id=pk).first()
-        pendaftaran = Pendaftaran.objects.filter(pasien=pasien, status='antre')
-        serializer = PendaftaranModelSerializer(pendaftaran, many=True)
-        return Response(
-            {
-                'code': '200',
-                'status': 'success',
-                'message': 'Data Pendaftaran berhasil diambil.',
-                'data': serializer.data
-            }, 
-            status=status.HTTP_200_OK
-        )
-    
-    @action(detail=True, methods=['get'])
-    def selesai(self, request, pk=None):
-        pasien = Pasien.objects.filter(id=pk).first()
-        pendaftaran = Pendaftaran.objects.filter(pasien=pasien, status='selesai')
+
+        status_param = request.query_params.get('status')
+        pendaftaran = Pendaftaran.objects.filter(pasien=pasien, status=status_param)
+
         serializer = PendaftaranModelSerializer(pendaftaran, many=True)
         return Response(
             {
@@ -355,15 +341,45 @@ class JadwalDokterModelViewset(ViewSet):
             }, 
             status=status.HTTP_201_CREATED
         )
+    
+    def update(self, request, pk=None):
+        jadwal_dokter = JadwalDokter.objects.filter(id=pk).first()
+        jadwal_dokter.hari = request.data['hari']
+        jadwal_dokter.jam_mulai = request.data['jam_mulai']
+        jadwal_dokter.jam_selesai = request.data['jam_selesai']
+        jadwal_dokter.save()
 
-    @action(detail=False, methods=['post'])
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Jadwal Dokter berhasil diupdate.',
+            }, 
+            status=status.HTTP_200_OK
+        )
+    
+    def destroy(self, request, pk=None):
+        jadwal_dokter = JadwalDokter.objects.filter(id=pk).first()
+        jadwal_dokter.delete()
+
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Jadwal Dokter berhasil dihapus.',
+            }, 
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=['get'])
     def dokter_tersedia(self, request):
-        tanggal = request.data['tanggal'].split('-')
+        tanggal = request.query_params.get('tanggal').split('-')
+        poli = request.query_params.get('poli')
 
         int_hari = datetime.date(int(tanggal[0]), int(tanggal[1]), int(tanggal[2])).weekday()
         hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu']
 
-        jadwal_dokter = JadwalDokter.objects.filter(hari=hari[int_hari], dokter__poli=request.data['poli'])
+        jadwal_dokter = JadwalDokter.objects.filter(hari=hari[int_hari], dokter__poli=poli)
         serializer = JadwalDokterModelSerializer(jadwal_dokter, many=True)
         return Response(
             {
