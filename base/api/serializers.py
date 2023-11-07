@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+from account.api.serializers import UserModelSerializer
+from account.models import User
+
 from base.models import Pendaftaran, Pemeriksaan, JadwalDokter
 
 
@@ -31,13 +34,15 @@ class JadwalDokterModelSerializer(serializers.ModelSerializer):
 
     def get_dokter_id(self, obj):
         return obj.dokter.id
-    
+
     def get_nama_dokter(self, obj):
         return obj.dokter.user.nama_lengkap
-    
+
     def get_foto(self, obj):
-        if obj.dokter.user.foto:
-            return obj.dokter.user.foto.url
+        user = User.objects.get(id=obj.dokter.user.id)
+        serializers = UserModelSerializer(user, context={'request': self.context['request']}).data
+        if serializers['foto']:
+            return serializers['foto']
         return None
     
     def get_is_full(self, obj):
@@ -45,3 +50,5 @@ class JadwalDokterModelSerializer(serializers.ModelSerializer):
         if count >= obj.dokter.max_pasien:
             return True
         return False
+    
+    
