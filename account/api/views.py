@@ -1,10 +1,14 @@
 from django.db import transaction
+from django.contrib.auth import authenticate
 
+from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
+
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from account.models import Dokter, Pasien, User, Resepsionis
 
@@ -265,6 +269,37 @@ class ResepsionisModelViewset(ViewSet):
             }, 
             status=status.HTTP_200_OK
         )
+
+
+from rest_framework_simplejwt.tokens import RefreshToken
+
+class UserLoginViewSet(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            refresh = RefreshToken.for_user(user)
+            refresh['nama_lengkap'] = user.nama_lengkap
+            refresh['email'] = user.email
+            refresh['role'] = user.role
+            refresh['is_admin'] = user.is_admin
+            
+            return Response({
+                'code': '200',
+                'status': 'success',
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'code': '400',
+                'status': 'failed',
+                'message': 'email atau password tidak valid',
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RegisterViewset(ViewSet):
