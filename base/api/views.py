@@ -325,6 +325,19 @@ class PemeriksaanModelViewset(ViewSet):
 class JadwalDokterModelViewset(ViewSet):
     permission_classes = [IsAuthenticated]
 
+    def list(self, request):
+        jadwal_dokter = JadwalDokter.objects.all()
+        serializer = JadwalDokterModelSerializer(jadwal_dokter, many=True, context={'request': request})
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Data Jadwal Dokter berhasil diambil.',
+                'data': serializer.data
+            }, 
+            status=status.HTTP_200_OK
+        )
+
     def create(self, request):
         dokter = Dokter.objects.get(id=request.data['dokter'])
         
