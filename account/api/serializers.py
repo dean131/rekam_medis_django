@@ -17,6 +17,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['email'] = user.email
         token['role'] = user.role
         token['is_admin'] = user.is_admin
+        token['test'] = 'test'
         # ...
 
         if user.role == 'pasien':

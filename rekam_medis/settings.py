@@ -106,7 +106,6 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
-# from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 ROOT_URLCONF = 'rekam_medis.urls'
 
@@ -139,6 +138,16 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'rekam_medis',
+#         'USER': 'root',
+#         'PASSWORD': '',
+#         'HOST': '127.0.0.1',
+#         'PORT': '3306',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -183,10 +192,10 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# MEDIA_ROOT = BASE_DIR / 'static/media' #development
+MEDIA_ROOT = BASE_DIR / 'static/media' #development
 
-STATIC_ROOT = '/home/faiz7297/public_html/rekammedis.faiznazhir.com/static' #production
-MEDIA_ROOT = '/home/faiz7297/public_html/rekammedis.faiznazhir.com/static/media' #production
+# STATIC_ROOT = '/home/faiz7297/public_html/rekammedis.faiznazhir.com/static' #production
+# MEDIA_ROOT = '/home/faiz7297/public_html/rekammedis.faiznazhir.com/static/media' #production
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
