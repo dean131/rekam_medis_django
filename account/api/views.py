@@ -287,8 +287,6 @@ class UserLoginViewSet(APIView):
         if user is not None:
             refresh = RefreshToken.for_user(user)
             refresh['user'] = UserModelSerializer(user).data
-
-            del refresh['user_id']
             
             if user.role == 'pasien':
                 pasien = Pasien.objects.get(user=user)
