@@ -19,6 +19,8 @@ from .serializers import (
     UserModelSerializer,
 )
 
+from django.contrib.auth import login, logout
+
 
 class PasienModelViewset(ViewSet):
     permission_classes = [IsAuthenticated]
@@ -272,7 +274,7 @@ class ResepsionisModelViewset(ViewSet):
         )
 
 
-from rest_framework_simplejwt.tokens import RefreshToken
+
 
 class UserLoginViewSet(APIView):
     permission_classes = [AllowAny]
@@ -285,6 +287,7 @@ class UserLoginViewSet(APIView):
 
         print(user)
         if user is not None:
+            login(request, user)
             refresh = RefreshToken.for_user(user)
             refresh['user'] = UserModelSerializer(user).data
             
@@ -436,3 +439,21 @@ class RegisterViewset(ViewSet):
             status=status.HTTP_201_CREATED
         )
 
+
+class UserLogoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        logout(request)
+        refresh_token = request.data.get('refresh')
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Logout Berhasil.'
+            }, 
+            status=status.HTTP_200_OK
+        )

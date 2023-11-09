@@ -20,5 +20,6 @@ router.register('resepsionis', views.ResepsionisModelViewset, basename='resepsio
 urlpatterns = [
     path('', include(router.urls)),
     path('login/', views.UserLoginViewSet.as_view(), name='login'),
+    path('logout/', views.UserLogoutAPIView.as_view(), name='logout'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
