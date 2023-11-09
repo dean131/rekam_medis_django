@@ -282,21 +282,23 @@ class UserLoginViewSet(APIView):
         password = request.data.get('password')
 
         user = authenticate(request, username=email, password=password)
+
+        print(user)
         if user is not None:
             refresh = RefreshToken.for_user(user)
             refresh['user'] = UserModelSerializer(user).data
 
             del refresh['user_id']
             
-        if user.role == 'pasien':
-            pasien = Pasien.objects.get(user=user)
-            pasien = PasienModelSerializer(pasien).data
-            refresh['nik'] = pasien['nik']
-            refresh['tanggal_lahir'] = pasien['tanggal_lahir']
-            refresh['no_telp'] = pasien['no_telp']
-            refresh['jenis_kelamin'] = pasien['jenis_kelamin']
-            refresh['pekerjaan'] = pasien['pekerjaan']
-            refresh['alamat'] = pasien['alamat']
+            if user.role == 'pasien':
+                pasien = Pasien.objects.get(user=user)
+                pasien = PasienModelSerializer(pasien).data
+                refresh['nik'] = pasien['nik']
+                refresh['tanggal_lahir'] = pasien['tanggal_lahir']
+                refresh['no_telp'] = pasien['no_telp']
+                refresh['jenis_kelamin'] = pasien['jenis_kelamin']
+                refresh['pekerjaan'] = pasien['pekerjaan']
+                refresh['alamat'] = pasien['alamat']
             
             return Response({
                 'code': '200',
