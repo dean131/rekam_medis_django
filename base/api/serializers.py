@@ -1,3 +1,5 @@
+import datetime
+
 from rest_framework import serializers
 
 from account.api.serializers import UserModelSerializer
@@ -25,18 +27,22 @@ class PemeriksaanModelSerializer(serializers.ModelSerializer):
 class JadwalDokterModelSerializer(serializers.ModelSerializer):
     dokter_id = serializers.SerializerMethodField('get_dokter_id')
     nama_dokter = serializers.SerializerMethodField('get_nama_dokter')
+    poli = serializers.SerializerMethodField('get_poli')
     foto = serializers.SerializerMethodField('get_foto')
     is_full = serializers.SerializerMethodField('get_is_full')
 
     class Meta:
         model = JadwalDokter
-        fields = ['id', 'dokter_id', 'nama_dokter', 'jam_mulai', 'jam_selesai', 'is_full', 'foto']
+        fields = ['id', 'dokter_id', 'nama_dokter', 'poli', 'hari', 'jam_mulai', 'jam_selesai', 'is_full', 'foto']
 
     def get_dokter_id(self, obj):
         return obj.dokter.id
 
     def get_nama_dokter(self, obj):
         return obj.dokter.user.nama_lengkap
+
+    def get_poli(self, obj):
+        return obj.dokter.poli
 
     def get_foto(self, obj):
         user = User.objects.get(id=obj.dokter.user.id)
