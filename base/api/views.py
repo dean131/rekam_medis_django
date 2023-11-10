@@ -295,8 +295,8 @@ class PemeriksaanModelViewset(ViewSet):
         with open(f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf.enc', 'wb') as f:
             f.write(encrypted_data)
 
-        # message = 'Token anda adalah:\n\n' + token + '\n\nSilahkan masukkan token tersebut pada aplikasi untuk melihat hasil pemeriksaan.'
-        # asyncio.run(self.send_wa_msg(pasien.no_telp, message))
+        message = 'Token anda adalah:\n\n' + token + '\n\nSilahkan masukkan token tersebut pada aplikasi untuk melihat hasil pemeriksaan.'
+        asyncio.run(self.send_wa_msg(pasien.no_telp, message))
 
         pendaftaran.status = 'selesai'
         pendaftaran.save()
@@ -320,7 +320,20 @@ class PemeriksaanModelViewset(ViewSet):
 
         fernet = Fernet(key)
         decrypted_data = fernet.decrypt(encrypted_data)
-        return HttpResponse(decrypted_data, content_type='application/pdf')
+
+        with open(f'{settings.MEDIA_ROOT}/decrypted/{pendaftaran.id}.pdf', 'wb') as f:
+            f.write(decrypted_data)
+
+        host = request.META['HTTP_HOST']
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Data Pemeriksaan berhasil diambil.',
+                'data': f'{host}{settings.MEDIA_URL}decrypted/{pendaftaran.id}.pdf'
+            }, 
+            status=status.HTTP_200_OK
+        )
 
 
 class JadwalDokterModelViewset(ViewSet):
