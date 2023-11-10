@@ -23,6 +23,7 @@ from account.models import Pasien, Dokter
 from .serializers import (
     PendaftaranModelSerializer, 
     JadwalDokterModelSerializer,
+    RiwayatPendaftaranModelSerializer,
 )
 
 from cryptography.fernet import Fernet
@@ -106,7 +107,7 @@ class PendaftaranModelViewset(ViewSet):
     
     def retrieve(self, request, pk=None):
         pendaftaran = Pendaftaran.objects.filter(id=pk).first()
-        serializer = PendaftaranModelSerializer(pendaftaran)
+        serializer = RiwayatPendaftaranModelSerializer(pendaftaran, context={'request': request})
 
         if pendaftaran.status == 'antre':
             count = Pendaftaran.objects.filter(tanggal=pendaftaran.tanggal, status='selesai').count()

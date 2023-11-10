@@ -61,3 +61,27 @@ class ResepsionisModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resepsionis
         fields = '__all__'
+
+
+# with no user datail
+class PasienNoUserModelSerializer(serializers.ModelSerializer):
+    umur = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Pasien
+        fields = '__all__'
+
+    def get_umur(self, obj):
+        today = datetime.date.today()
+        born = obj.tanggal_lahir
+        return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+
+
+class DokterNoUserModelSerializer(serializers.ModelSerializer):
+    nama_lengkap = serializers.SerializerMethodField('get_nama_lengkap')
+    class Meta:
+        model = Dokter
+        exclude = ['max_pasien', 'user']
+
+    def get_nama_lengkap(self, obj):
+        return obj.user.nama_lengkap

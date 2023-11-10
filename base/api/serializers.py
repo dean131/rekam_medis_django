@@ -2,7 +2,14 @@ import datetime
 
 from rest_framework import serializers
 
-from account.api.serializers import UserModelSerializer
+from account.api.serializers import (
+    UserModelSerializer, 
+    PasienNoUserModelSerializer,
+    DokterNoUserModelSerializer,
+    PasienModelSerializer,
+    DokterModelSerializer
+)
+
 from account.models import User
 
 from base.models import Pendaftaran, Pemeriksaan, JadwalDokter
@@ -17,6 +24,30 @@ class PendaftaranModelSerializer(serializers.ModelSerializer):
     def get_poli(self, obj):
         return obj.dokter.poli
 
+
+class RiwayatPendaftaranModelSerializer(serializers.ModelSerializer):
+    pasien = PasienModelSerializer()
+    dokter = DokterModelSerializer()
+    jam = serializers.SerializerMethodField('get_jam')
+
+    class Meta:
+        model = Pendaftaran
+        fields = '__all__'
+
+    def get_poli(self, obj):
+        return obj.dokter.poli
+    
+    def get_jam(self, obj):
+        tanggal = str(obj.tanggal).split('-')
+        int_hari = datetime.date(int(tanggal[0]), int(tanggal[1]), int(tanggal[2])).weekday()
+        hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu']
+        jadwal_doter = obj.dokter.jadwaldokter_set.filter(dokter=obj.dokter, hari=hari[int_hari]).first()
+        jam = f'{jadwal_doter.jam_mulai.strftime("%H:%M")} - {jadwal_doter.jam_selesai.strftime("%H:%M")}'
+        return jam
+   
+
+
+    
 
 class PemeriksaanModelSerializer(serializers.ModelSerializer):
     class Meta:
