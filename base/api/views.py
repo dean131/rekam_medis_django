@@ -61,7 +61,7 @@ class PendaftaranModelViewset(ViewSet):
             )
         
         dokter = Dokter.objects.filter(id=request.data['dokter']).first()
-        count = Pendaftaran.objects.filter(tanggal=request.data['tanggal']).count()
+        count = Pendaftaran.objects.filter(tanggal=request.data['tanggal'], dokter=dokter).count()
 
         if count >= dokter.max_pasien:
             return Response(

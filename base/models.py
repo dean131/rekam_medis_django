@@ -1,7 +1,10 @@
 from django.db import models
+from django.utils.crypto import get_random_string
 
 from account.models import Dokter, Pasien
 
+def random_pk():
+    return get_random_string(6)
 
 class JadwalDokter(models.Model):
     HARI_CHOICES = (
@@ -27,6 +30,7 @@ class Pendaftaran(models.Model):
         ("selesai", "Selesai"),
     )
 
+    id = models.CharField(max_length=20, primary_key=True, default=random_pk, editable=False)
     pasien = models.ForeignKey(Pasien, on_delete=models.CASCADE)
     dokter = models.ForeignKey(Dokter, on_delete=models.CASCADE)
     asuransi = models.BooleanField(default=False)
@@ -36,11 +40,13 @@ class Pendaftaran(models.Model):
 
 
 class Pemeriksaan(models.Model):
+    id = models.CharField(max_length=20, primary_key=True, default=random_pk, editable=False)
     pendaftaran = models.OneToOneField(Pendaftaran, on_delete=models.CASCADE)
     path_pdf = models.CharField(max_length=255, blank=True, null=True)
     token = models.TextField(blank=True, null=True)
     
     def __str__(self):
         return self.pendaftaran.pasien.user.nama_lengkap
+    
 
 
