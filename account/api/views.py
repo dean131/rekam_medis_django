@@ -83,8 +83,8 @@ class PasienModelViewset(ViewSet):
         pasien.save()
 
         user = User.objects.get(pk=pasien.user.pk)
-        user.nama_lengkap = request.data.get('nama_lengkap')
-        user.foto = request.data.get('foto', None)
+        if request.data.get('nama_lengkap'): user.nama_lengkap = request.data.get('nama_lengkap') 
+        if request.data.get('foto'): user.foto = request.data.get('foto', None)
 
         email = request.data.get('email')
         if email != user.email:
