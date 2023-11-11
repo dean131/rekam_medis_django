@@ -431,5 +431,25 @@ class JadwalDokterModelViewset(ViewSet):
         )
     
 
+class DashboardDokterViewSet(ViewSet):
+    def list(self, request):
+        dokter = Dokter.objects.filter(user=request.user).first()
+        tanggal = datetime.date.today()
 
+        jml_pasien_belum_bayar_hari_ini = Pendaftaran.objects.filter(dokter=dokter, status='belum_bayar', tanggal=tanggal).count()
+        jml_pasien_antre_hari_ini = Pendaftaran.objects.filter(dokter=dokter, status='antre', tanggal=tanggal).count()
+        jml_pasien_selesai_hari_ini = Pendaftaran.objects.filter(dokter=dokter, status='selesai', tanggal=tanggal).count()
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Data Dashboard Dokter berhasil diambil.',
+                'data': {
+                    'jml_pasien_belum_bayar_hari_ini': jml_pasien_belum_bayar_hari_ini,
+                    'jml_pasien_antre_hari_ini': jml_pasien_antre_hari_ini,
+                    'jml_pasien_selesai_hari_ini': jml_pasien_selesai_hari_ini,
+                }
+            }, 
+            status=status.HTTP_200_OK
+        )
     
