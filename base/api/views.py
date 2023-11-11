@@ -238,7 +238,7 @@ class PemeriksaanModelViewset(ViewSet):
                 {
                     'code': '400',
                     'status': 'failed',
-                    'message': 'Pasien belum mendaftar pada dokter ini.',
+                    'message': 'Pendaftaran tidak ditemukan.',
                 }, 
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -293,8 +293,8 @@ class PemeriksaanModelViewset(ViewSet):
         with open(f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf.enc', 'wb') as f:
             f.write(encrypted_data)
 
-        message = 'Token anda adalah:\n\n' + token + '\n\nSilahkan masukkan token tersebut pada aplikasi untuk melihat hasil pemeriksaan.'
-        asyncio.run(self.send_wa_msg(pendaftaran.pasien.no_telp, message))
+        # message = 'Token anda adalah:\n\n' + token + '\n\nSilahkan masukkan token tersebut pada aplikasi untuk melihat hasil pemeriksaan.'
+        # asyncio.run(self.send_wa_msg(pendaftaran.pasien.no_telp, message))
 
         pendaftaran.status = 'selesai'
         pendaftaran.save()
@@ -309,31 +309,41 @@ class PemeriksaanModelViewset(ViewSet):
     
     @action(detail=False, methods=['post'])
     def get_pdf(self, request):
-        pendaftaran = Pendaftaran.objects.filter(id=request.data.get('pendaftaran_id')).first()
-        pemeriksaan = Pemeriksaan.objects.filter(pendaftaran=pendaftaran).first()
-        key = bytes(request.data.get('key'), 'UTF-8')
+        try:
+            pendaftaran = Pendaftaran.objects.filter(id=request.data.get('pendaftaran_id')).first()
+            pemeriksaan = Pemeriksaan.objects.filter(pendaftaran=pendaftaran).first()
+            key = bytes(request.data.get('key'), 'UTF-8')
 
-        with open(f'{settings.MEDIA_ROOT}/{pemeriksaan.path_pdf}', 'rb') as f:
-            encrypted_data = f.read()
+            with open(f'{settings.MEDIA_ROOT}/{pemeriksaan.path_pdf}', 'rb') as f:
+                encrypted_data = f.read()
 
-        fernet = Fernet(key)
-        decrypted_data = fernet.decrypt(encrypted_data)
+            fernet = Fernet(key)
+            decrypted_data = fernet.decrypt(encrypted_data)
 
-        # return HttpResponse(decrypted_data, content_type='application/pdf')
+            # return HttpResponse(decrypted_data, content_type='application/pdf')
 
-        with open(f'{settings.MEDIA_ROOT}/decrypted/{pendaftaran.id}.pdf', 'wb') as f:
-            f.write(decrypted_data)
+            with open(f'{settings.MEDIA_ROOT}/decrypted/{pendaftaran.id}.pdf', 'wb') as f:
+                f.write(decrypted_data)
 
-        host = request.META['HTTP_HOST']
-        return Response(
-            {
-                'code': '200',
-                'status': 'success',
-                'message': 'Data Pemeriksaan berhasil diambil.',
-                'data': f'{host}{settings.MEDIA_URL}decrypted/{pendaftaran.id}.pdf'
-            }, 
-            status=status.HTTP_200_OK
-        )
+            host = request.META['HTTP_HOST']
+            return Response(
+                {
+                    'code': '200',
+                    'status': 'success',
+                    'message': 'Data Pemeriksaan berhasil diambil.',
+                    'data': f'{host}{settings.MEDIA_URL}decrypted/{pendaftaran.id}.pdf'
+                }, 
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'code': '400',
+                    'status': 'failed',
+                    'message': str(e),
+                }, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class JadwalDokterModelViewset(ViewSet):
