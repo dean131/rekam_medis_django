@@ -293,7 +293,7 @@ class PemeriksaanModelViewset(ViewSet):
         with open(f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf.enc', 'wb') as f:
             f.write(encrypted_data)
 
-        # message = 'Token anda adalah:\n\n' + token + '\n\nSilahkan masukkan token tersebut pada aplikasi untuk melihat hasil pemeriksaan.'
+        message = f'Token anda adalah:\n\n*{token}*\n\nSilahkan masukkan token tersebut pada aplikasi untuk melihat hasil pemeriksaan.\n\n ID pendaftaran: *{pendaftaran.id}*\n\nTerima kasih.'
         # asyncio.run(self.send_wa_msg(pendaftaran.pasien.no_telp, message))
 
         pendaftaran.status = 'selesai'

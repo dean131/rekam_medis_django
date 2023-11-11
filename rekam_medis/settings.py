@@ -194,7 +194,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# MEDIA_ROOT = BASE_DIR / 'static/media' #development
+# MEDIA_ROOT = BASE_DIR / 'static/media' #develop/ment
 
 STATIC_ROOT = '/home/faiz7297/public_html/rekammedis.faiznazhir.com/static' #production
 MEDIA_ROOT = '/home/faiz7297/public_html/rekammedis.faiznazhir.com/static/media' #production
