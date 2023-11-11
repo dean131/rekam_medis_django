@@ -311,10 +311,10 @@ class PemeriksaanModelViewset(ViewSet):
     def get_pdf(self, request):
         try:
             pendaftaran = Pendaftaran.objects.filter(id=request.data.get('pendaftaran_id')).first()
-            pemeriksaan = Pemeriksaan.objects.filter(pendaftaran=pendaftaran).first()
+            # pemeriksaan = Pemeriksaan.objects.filter(pendaftaran=pendaftaran).first()
             key = bytes(request.data.get('key'), 'UTF-8')
 
-            with open(f'{settings.MEDIA_ROOT}/{pemeriksaan.path_pdf}', 'rb') as f:
+            with open(f'{settings.MEDIA_ROOT}/{pendaftaran.id}.pdf.enc', 'rb') as f:
                 encrypted_data = f.read()
 
             fernet = Fernet(key)
