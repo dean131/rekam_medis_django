@@ -272,7 +272,7 @@ class PemeriksaanModelViewset(ViewSet):
         )
 
         pdf = render_to_pdf({
-            'pasien': pendaftaran.user.pasien,
+            'pasien': pendaftaran.pasien,
             'keluhan': request.data['keluhan'],
             'suhu_tubuh': request.data['suhu_tubuh'],
             'tensi_darah': request.data['tensi_darah'],
