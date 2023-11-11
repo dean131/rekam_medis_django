@@ -74,12 +74,12 @@ class PasienModelViewset(ViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
         
-        pasien.nik = request.data.get('nik')
-        pasien.tanggal_lahir = request.data.get('tanggal_lahir')
-        pasien.jenis_kelamin = request.data.get('jenis_kelamin')
-        pasien.alamat = request.data.get('alamat')
-        pasien.no_telp = request.data.get('no_telp')
-        pasien.pekerjaan = request.data.get('pekerjaan')
+        if request.data.get('nik'): pasien.nik = request.data.get('nik') 
+        if request.data.get('tanggal_lahir'): pasien.tanggal_lahir = request.data.get('tanggal_lahir')
+        if request.data.get('jenis_kelamin'): pasien.jenis_kelamin = request.data.get('jenis_kelamin')
+        if request.data.get('alamat'): pasien.alamat = request.data.get('alamat')
+        if request.data.get('no_telp'): pasien.no_telp = request.data.get('no_telp')
+        if request.data.get('pekerjaan'): pasien.pekerjaan = request.data.get('pekerjaan')
         pasien.save()
 
         user = User.objects.get(pk=pasien.user.pk)
