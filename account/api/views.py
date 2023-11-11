@@ -49,7 +49,8 @@ class PasienModelViewset(ViewSet):
             status=status.HTTP_200_OK
         )
     
-    def update(self, request, pk=None):
+    @action(detail=True, methods=['post'])
+    def update_profile(self, request, pk=None):
         pasien = Pasien.objects.filter(pk=pk).first()
         
         if pasien.user.email != request.data.get('email'):
