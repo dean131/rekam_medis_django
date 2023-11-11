@@ -453,3 +453,27 @@ class DashboardDokterViewSet(ViewSet):
             status=status.HTTP_200_OK
         )
     
+
+class DashboardResepsionisViewSet(ViewSet):
+    def list(self, request):
+        tanggal = datetime.date.today()
+
+        jml_pasien_belum_bayar_hari_ini = Pendaftaran.objects.filter(status='belum_bayar', tanggal=tanggal).count()
+        jml_pasien_antre_hari_ini = Pendaftaran.objects.filter(status='antre', tanggal=tanggal).count()
+        jml_pasien_selesai_hari_ini = Pendaftaran.objects.filter(status='selesai', tanggal=tanggal).count()        
+        return Response(
+            {
+                'code': '200',
+                'status': 'success',
+                'message': 'Data Dashboard Dokter berhasil diambil.',
+                'data': {
+                    'jml_pasien_belum_bayar_hari_ini': jml_pasien_belum_bayar_hari_ini,
+                    'jml_pasien_antre_hari_ini': jml_pasien_antre_hari_ini,
+                    'jml_pasien_selesai_hari_ini': jml_pasien_selesai_hari_ini,
+                }
+            }, 
+            status=status.HTTP_200_OK
+        )
+
+
+    
