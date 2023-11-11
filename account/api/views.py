@@ -294,6 +294,7 @@ class UserLoginViewSet(APIView):
             if user.role == 'pasien':
                 pasien = Pasien.objects.get(user=user)
                 pasien = PasienModelSerializer(pasien).data
+                refresh['pasien_id'] = pasien['id']
                 refresh['nik'] = pasien['nik']
                 refresh['tanggal_lahir'] = pasien['tanggal_lahir']
                 refresh['no_telp'] = pasien['no_telp']

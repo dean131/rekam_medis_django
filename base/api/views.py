@@ -231,9 +231,7 @@ class PemeriksaanModelViewset(ViewSet):
             return res
 
     def create(self, request):
-        pasien = Pasien.objects.filter(id=request.data.get('pasien')).first()
-        dokter = Dokter.objects.filter(id=request.data.get('dokter')).first()
-        pendaftaran = Pendaftaran.objects.filter(pasien=pasien, dokter=dokter).first()
+        pendaftaran = Pendaftaran.objects.filter(id=request.data.get('pendaftaran_id')).first()
 
         if not pendaftaran:
             return Response(
@@ -296,7 +294,7 @@ class PemeriksaanModelViewset(ViewSet):
             f.write(encrypted_data)
 
         message = 'Token anda adalah:\n\n' + token + '\n\nSilahkan masukkan token tersebut pada aplikasi untuk melihat hasil pemeriksaan.'
-        asyncio.run(self.send_wa_msg(pasien.no_telp, message))
+        asyncio.run(self.send_wa_msg(pendaftaran.pasien.no_telp, message))
 
         pendaftaran.status = 'selesai'
         pendaftaran.save()
@@ -320,6 +318,8 @@ class PemeriksaanModelViewset(ViewSet):
 
         fernet = Fernet(key)
         decrypted_data = fernet.decrypt(encrypted_data)
+
+        # return HttpResponse(decrypted_data, content_type='application/pdf')
 
         with open(f'{settings.MEDIA_ROOT}/decrypted/{pendaftaran.id}.pdf', 'wb') as f:
             f.write(decrypted_data)
