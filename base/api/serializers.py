@@ -65,7 +65,7 @@ class JadwalDokterModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = JadwalDokter
-        fields = ['id', 'dokter_id', 'nama_dokter', 'poli', 'hari', 'jam', 'is_full', 'foto']
+        fields = ['id', 'dokter_id', 'nama_dokter', 'jam_mulai', 'jam_selesai', 'poli', 'hari', 'jam', 'is_full', 'foto']
 
     def get_jam(self, obj):
         return f'{obj.jam_mulai.strftime("%H:%M")} - {obj.jam_selesai.strftime("%H:%M")}'

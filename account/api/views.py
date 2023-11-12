@@ -320,7 +320,6 @@ class UserLoginViewSet(APIView):
 class RegisterViewset(ViewSet):
     permission_classes = [AllowAny]
 
-    @transaction.atomic
     @action(detail=False, methods=['post'])
     def pasien(self, request):
         if User.objects.filter(email=request.data.get('email')).exists():
