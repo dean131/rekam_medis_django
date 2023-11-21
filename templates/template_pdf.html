@@ -65,10 +65,27 @@
     <p><strong>Pekerjaan:</strong>{{pasien.pekerjaan}}</p>
     <p><strong>Alamat:</strong>{{pasien.alamat}}</p>
 
+    {% if riwayat %}
     <h2>Riwayat Kesehatan</h2>
     <p><strong>Diagnosis:</strong> Diabetes Tipe 2</p>
     <p><strong>Tanggal Diagnosis:</strong> 10 Juli 2010</p>
     <p><strong>Rekomendasi Perawatan:</strong> Diet rendah gula, olahraga rutin, obat-obatan</p>
+    {% endif %}
+
+    <h2>Data Pemeriksaan</h2>
+    <p><strong>Keluhan:</strong>{{keluhan}}</p>
+    <p><strong>Suhu Tubuh:</strong>{{suhu_tubuh}}</p>
+    <p><strong>Tensi Darah</strong>{{tensi_darah}}</p>
+    <p><strong>Berat Badan</strong>{{berat_badan}}</p>
+    <p><strong>Tinggi Badan</strong>{{tinggi_badan}}</p>
+    <p><strong>Nadi Permenit</strong>{{nadi_per_menit}}</p>
+    <p><strong>Alergi</strong>{{alergi}}</p>
+    <p><strong>Riwayat Penyakit</strong>{{riwayat_penyakit}}</p>
+
+    <h2>Hasil Pemeriksaan</h2>
+    <p><strong>Diagnosis</strong>{{diagnosis}}</p>
+    <p><strong>Instruksi Dokter</strong>{{intruksi}}</p>
+    <p><strong>Resep</strong>{{resep}}</p>
 
     {% if riwayat %}
     <h2>Riwayat Pengobatan</h2>
@@ -91,13 +108,16 @@
     </table>
     {% endif %}
 
-    <h2>Hasil Pemeriksaan Terakhir</h2>
+    
+    <h2>Hasil Pemeriksaan</h2>
     <p><strong>Tekanan Darah:</strong> 120/80 mmHg</p>
     <p><strong>Gula Darah:</strong> 110 mg/dL</p>
     <p><strong>HbA1c:</strong> 6.5%</p>
 
+    {% if catatan %}
     <h2>Catatan Tambahan</h2>
     <p>{{ catatan }}</p>
+    {% endif %}
 
     <footer>
         <p>Laporan dibuat pada tanggal: {{ tanggal_pembuatan }}</p>
