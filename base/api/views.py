@@ -40,6 +40,40 @@ def render_to_pdf(context_dict):
     return None
 
 
+class QueuePasien:
+    def __init__(self, tanggal):
+        self.antrean = []
+
+        pendaftarans = Pendaftaran.objects.filter(tanggal=tanggal, no_antrean__isnull=False)
+        for p in pendaftarans:
+            self.antrean.append(p)
+
+        print("\n="*50)
+        print("Antrean saat awal: ", self.antrean)
+        print("Panjang antrean saat awal: ", self.size())
+
+    def enqueue(self, pendaftaran):  
+        pendaftaran.status = 'antre'
+        pendaftaran.no_antrean = self.size() + 1
+        pendaftaran.save()
+        self.antrean.append(pendaftaran)
+
+        print("\n="*50)
+        print("\nAntrean saat enqueue: ", self.antrean)
+        print("\nPanjang antrean saat enqueue: ", self.size())
+    
+    def dequeue(self):
+        if len(self.antrean) < 1:
+            return None
+        return self.antrean.pop(0)
+
+    def size(self):
+        return len(self.antrean)
+    
+    def get(self):
+        return self.antrean
+
+
 class PendaftaranModelViewset(ViewSet):
     permission_classes = [IsAuthenticated]
 
@@ -181,11 +215,15 @@ class PendaftaranModelViewset(ViewSet):
     def bayar(self, request, pk=None):
         pendaftaran = Pendaftaran.objects.get(id=pk)
 
-        jml_pendaftaran = Pendaftaran.objects.filter(tanggal=pendaftaran.tanggal, no_antrean__isnull=False).count()
+        # jml_pendaftaran = Pendaftaran.objects.filter(tanggal=pendaftaran.tanggal, no_antrean__isnull=False).count()
 
-        pendaftaran.status = 'antre'
-        pendaftaran.no_antrean = jml_pendaftaran + 1
-        pendaftaran.save()
+        # pendaftaran.status = 'antre'
+        # pendaftaran.no_antrean = jml_pendaftaran + 1
+        # pendaftaran.save()
+
+        antrean = QueuePasien(pendaftaran.tanggal)
+        antrean.enqueue(pendaftaran)
+
 
         return Response(
             {
@@ -222,7 +260,7 @@ class PemeriksaanModelViewset(ViewSet):
         async with httpx.AsyncClient() as client:
             res = await client.post(
                 url='https://api.fonnte.com/send', 
-                headers={'Authorization': 'D2Rgt2EnoYQ7G5K-wrFg'},
+                headers={'Authorization': 'QQqU@J3kk#nIJthgosd1'},
                 json={
                     'target': number, 
                     'message': message
@@ -294,7 +332,7 @@ class PemeriksaanModelViewset(ViewSet):
             f.write(encrypted_data)
 
         message = f'Token anda adalah:\n\n*{token}*\n\nSilahkan masukkan token tersebut pada aplikasi untuk melihat hasil pemeriksaan.\n\n ID pendaftaran: *{pendaftaran.id}*\n\nTerima kasih.'
-        # asyncio.run(self.send_wa_msg(pendaftaran.pasien.no_telp, message))
+        asyncio.run(self.send_wa_msg(pendaftaran.pasien.no_telp, message))
 
         pendaftaran.status = 'selesai'
         pendaftaran.save()
