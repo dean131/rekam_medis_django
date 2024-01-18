@@ -215,12 +215,6 @@ class PendaftaranModelViewset(ViewSet):
     def bayar(self, request, pk=None):
         pendaftaran = Pendaftaran.objects.get(id=pk)
 
-        # jml_pendaftaran = Pendaftaran.objects.filter(tanggal=pendaftaran.tanggal, no_antrean__isnull=False).count()
-
-        # pendaftaran.status = 'antre'
-        # pendaftaran.no_antrean = jml_pendaftaran + 1
-        # pendaftaran.save()
-
         antrean = QueuePasien(pendaftaran.tanggal)
         antrean.enqueue(pendaftaran)
 
