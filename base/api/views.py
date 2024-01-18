@@ -49,23 +49,23 @@ class QueuePasien:
             self.antrean.append(p)
 
         print("="*50)
-        print("Antrean saat awal: ", self.antrean)
+        print("Antrean saat awal: ", self.get())
         print("Panjang antrean saat awal: ", self.size())
 
-    def enqueue(self, pendaftaran):  
+    def enqueue(self, pendaftaran):
         pendaftaran.status = 'antre'
         pendaftaran.no_antrean = self.size() + 1
         pendaftaran.save()
         self.antrean.append(pendaftaran)
 
         print("="*50)
-        print("\nAntrean saat enqueue: ", self.antrean)
-        print("\nPanjang antrean saat enqueue: ", self.size())
+        print("Antrean saat enqueue: ", self.get())
+        print("Panjang antrean saat enqueue: ", self.size())
     
-    def dequeue(self):
-        if len(self.antrean) < 1:
-            return None
-        return self.antrean.pop(0)
+    # def dequeue(self):
+    #     if len(self.antrean) < 1:
+    #         return None
+    #     return self.antrean.pop(0)
 
     def size(self):
         return len(self.antrean)

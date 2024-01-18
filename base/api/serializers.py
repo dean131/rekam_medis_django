@@ -28,7 +28,7 @@ class PendaftaranModelSerializer(serializers.ModelSerializer):
 class RiwayatPendaftaranModelSerializer(serializers.ModelSerializer):
     pasien = PasienModelSerializer()
     dokter = DokterModelSerializer()
-    jam = serializers.SerializerMethodField('get_jam')
+    jam = serializers.SerializerMethodField()
 
     class Meta:
         model = Pendaftaran
