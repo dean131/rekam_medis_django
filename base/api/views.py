@@ -48,7 +48,7 @@ class QueuePasien:
         for p in pendaftarans:
             self.antrean.append(p)
 
-        print("\n="*50)
+        print("="*50)
         print("Antrean saat awal: ", self.antrean)
         print("Panjang antrean saat awal: ", self.size())
 
@@ -58,7 +58,7 @@ class QueuePasien:
         pendaftaran.save()
         self.antrean.append(pendaftaran)
 
-        print("\n="*50)
+        print("="*50)
         print("\nAntrean saat enqueue: ", self.antrean)
         print("\nPanjang antrean saat enqueue: ", self.size())
     
