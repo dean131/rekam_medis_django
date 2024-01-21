@@ -382,7 +382,11 @@ class JadwalDokterModelViewset(ViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
+        hari = request.query_params.get('hari')
+        poli = request.query_params.get('poli')
         jadwal_dokter = JadwalDokter.objects.all()
+        if hari and poli:
+            jadwal_dokter = jadwal_dokter.filter(hari=hari, dokter__poli=poli)
         serializer = JadwalDokterModelSerializer(jadwal_dokter, many=True, context={'request': request})
         return Response(
             {
